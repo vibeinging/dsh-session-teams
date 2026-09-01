@@ -5,10 +5,11 @@ import { basename, dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
-const englishFiles = [
-  'README.md',
-  'docs/design/2026-09-01_window-link-design.md',
-  '.agents/notes/implemented/feature/2026-09-01-window-link.md',
+const pairs = [
+  { english: 'README.md', record: '.i18n/README.i18n.yaml' },
+  { english: 'docs/design/2026-09-01_window-link-design.md' },
+  { english: 'docs/reports/2026-09-01_public-npm-readiness.md' },
+  { english: '.agents/notes/implemented/feature/2026-09-01-window-link.md' },
 ]
 
 function blobHash(content) {
@@ -32,11 +33,12 @@ function structure(source) {
   }
 }
 
-for (const englishRelative of englishFiles) {
+for (const pair of pairs) {
+  const englishRelative = pair.english
   const directory = dirname(englishRelative)
   const stem = basename(englishRelative, '.md')
   const chineseRelative = join(directory, `${stem}.zh.md`)
-  const recordRelative = join(directory, `${stem}.i18n.yaml`)
+  const recordRelative = pair.record ?? join(directory, `${stem}.i18n.yaml`)
   const english = await readFile(join(root, englishRelative), 'utf8')
   const chinese = await readFile(join(root, chineseRelative), 'utf8')
   const record = await readFile(join(root, recordRelative), 'utf8')
@@ -52,4 +54,4 @@ for (const englishRelative of englishFiles) {
   assert.equal(record, expected, `${recordRelative} hashes`)
 }
 
-console.log(`document pairs: ${englishFiles.map(file => relative(root, join(root, file))).join(', ')} passed`)
+console.log(`document pairs: ${pairs.map(pair => relative(root, join(root, pair.english))).join(', ')} passed`)

@@ -38,15 +38,15 @@ describe('window link header action', () => {
       value: { writeText },
     })
     const t = (key: string): string => ({
-      'copy.label': '复制会话链接',
-      'copy.success': '会话链接已复制',
-      'copy.failure': '无法复制会话链接',
+      'copy.label': '跟另一个窗口对话',
+      'copy.success': '已复制，粘贴到另一个窗口',
+      'copy.failure': '复制失败，请重试',
     })[key] ?? key
     const view = render(<WindowLinkAction {...({ sessionId: 'session-one', t } as never)} />)
-    fireEvent.click(view.getByRole('button', { name: '复制会话链接' }))
+    fireEvent.click(view.getByRole('button', { name: '跟另一个窗口对话' }))
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith('dsh://session/session-one')
-      expect(view.getByRole('button', { name: '会话链接已复制' })).toBeDefined()
+      expect(view.getByRole('button', { name: '已复制，粘贴到另一个窗口' })).toBeDefined()
     })
   })
 })

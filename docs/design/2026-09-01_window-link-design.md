@@ -2,7 +2,7 @@
 
 English | [中文](2026-09-01_window-link-design.zh.md)
 
-This reference defines the protocol, authority, delivery, and browser boundaries owned by `@deepseek-ai/dsh-window-link`.
+This reference defines the protocol, authority, delivery, and browser boundaries owned by `@vibeinging/dsh-window-link`.
 
 ## Scope
 
@@ -32,8 +32,12 @@ Each call carries `message_id`; the tool creates one when the model omits it. `D
 
 ## Browser integration
 
-The browser entry registers in `conversation.session.header.actions` and receives `sessionId` from the standard session slot props. It serializes the canonical link, writes it through the browser Clipboard API with an `execCommand('copy')` fallback, and exposes localized idle, success, and failure labels. Its CSS and link icon are bundled into `lib/client.js`; the browser artifact imports only React at runtime.
+The browser entry registers in `conversation.session.header.actions` and receives `sessionId` from the standard session slot props. Its user-facing action is **Talk to another window**. It serializes the canonical link, writes it through the browser Clipboard API with an `execCommand('copy')` fallback, and then tells the user to paste it into another window. Its CSS and link icon are bundled into `lib/client.js`; the browser artifact imports only React at runtime.
+
+## SDK and package boundary
+
+The package targets DSH `0.1.2-alpha.3`. Its DSH feature peers use that version; Cordis `4.0.2`, Cordis Loader `1.0.3`, and Schemastery `3.18.2` are the official compatible foundation releases. The alpha.3 client entry uses the Cordis client context and `dsh.client` package metadata. No runtime or TypeScript path resolves through a DSH source checkout.
 
 ## Current limit
 
-Cold-session delivery is outside this version. The official Host API gateway provides the correct resume-or-route behavior, but its `0.0.1-rc.2` external NPM dependency graph cannot currently be installed cleanly because required transitive SDK packages are unavailable from the registry. The plugin keeps the active-window contract instead of adding source-checkout paths or a second persistence and routing system.
+Cold-session delivery is outside this version. Resuming or routing an inactive session needs durable ownership and lifecycle rules beyond the live `AgentRegistry`. The plugin keeps the active-window contract instead of adding a second persistence and routing system.

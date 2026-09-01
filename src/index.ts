@@ -1,7 +1,7 @@
 /**
  * DSH window-link host plugin: register one consent-gated tool that queues a
  * task to another ordinary DSH session through the official API gateway.
- * @module @deepseek-ai/dsh-window-link
+ * @module @vibeinging/dsh-window-link
  */
 import { randomUUID } from 'node:crypto'
 import type { Context } from '@deepseek-ai/cordis'

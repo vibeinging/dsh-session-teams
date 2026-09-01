@@ -1,5 +1,5 @@
 /** Browser entry: register the copy-link action in the conversation header. */
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client';
+import type { Context as ClientContext } from '@deepseek-ai/cordis';
 import { type WindowLinkKey } from './locales.ts';
 export { WindowLinkAction, type WindowLinkActionProps } from './WindowLinkAction.tsx';
 export type { WindowLinkKey } from './locales.ts';

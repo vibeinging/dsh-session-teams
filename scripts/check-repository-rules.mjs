@@ -14,21 +14,38 @@ const forbiddenCheckout = new RegExp([
 ].join(''), 'u')
 const emoji = /[\p{Emoji_Presentation}\uFE0F\u200D\p{Regional_Indicator}\u2600-\u27BF]/u
 
-assert.equal(packageJson.name, '@deepseek-ai/dsh-window-link')
-assert.equal(packageJson.private, true, 'private plugin must reject publication')
-assert.equal(packageJson.publishConfig, undefined, 'private plugin must not declare publishConfig')
+assert.equal(packageJson.name, '@vibeinging/dsh-window-link')
+assert.equal(packageJson.private, undefined, 'public package must not set private')
+assert.deepEqual(packageJson.publishConfig, {
+  access: 'public',
+  registry: 'https://registry.npmjs.org/',
+})
 assert.equal(packageJson.packageManager, 'pnpm@11.7.0')
 assert.equal(packageJson.engines?.node, '^22.19.0 || >=24.0.0')
 assert.equal(packageJson.dsh?.bundle?.patch, './cordis.patch.yml')
-assert.equal(packageJson.dshClient?.platform, 'web')
-assert.deepEqual(packageJson.dshClient?.inject, [
+assert.equal(packageJson.dsh?.client?.platform, 'web')
+assert.deepEqual(packageJson.dsh?.client?.inject, [
   '@deepseek-ai/dsh-client-locale',
   '@deepseek-ai/dsh-client-ui-conversation',
 ])
+assert.equal(packageJson.dshClient, undefined, 'legacy dshClient metadata is not accepted')
+assert.equal(packageJson.scripts?.prepublishOnly, 'pnpm run check')
+assert.deepEqual(packageJson.files, [
+  'lib/index.js',
+  'lib/client.js',
+  'lib/client.js.map',
+  'lib/types/**/*.d.ts',
+  'cordis.patch.yml',
+  'README.md',
+  'README.zh.md',
+  'LICENSE',
+])
 
 for (const [name, command] of Object.entries(packageJson.scripts ?? {})) {
-  assert.equal(name === 'prepack' || name === 'prepare' || name.includes('publish'), false, `forbidden script ${name}`)
-  assert.equal(/(?:npm|pnpm)\s+(?:publish|pack)\b/u.test(String(command)), false, `${name} creates or publishes a package`)
+  if (name === 'prepublishOnly') continue
+  assert.equal(['prepare', 'prepack', 'postpack', 'publish', 'postpublish'].includes(name), false, `forbidden script ${name}`)
+  assert.equal(name.includes('publish'), false, `forbidden script ${name}`)
+  assert.equal(/(?:npm|pnpm)\s+publish\b/u.test(String(command)), false, `${name} publishes a package`)
 }
 for (const field of dependencyFields) {
   for (const [name, specifier] of Object.entries(packageJson[field] ?? {})) {
@@ -40,6 +57,30 @@ for (const [name, specifier] of Object.entries(packageJson.peerDependencies ?? {
   if (!name.startsWith('@deepseek-ai/')) continue
   assert.equal(packageJson.devDependencies?.[name], specifier, `${name} must use the same peer and development version`)
 }
+assert.deepEqual({
+  cordis: packageJson.devDependencies?.['@deepseek-ai/cordis'],
+  loader: packageJson.devDependencies?.['@deepseek-ai/cordis-plugin-loader'],
+  schemastery: packageJson.dependencies?.['@deepseek-ai/schemastery'],
+}, {
+  cordis: '4.0.2',
+  loader: '1.0.3',
+  schemastery: '3.18.2',
+})
+for (const name of [
+  '@deepseek-ai/dsh-agent',
+  '@deepseek-ai/dsh-client-locale',
+  '@deepseek-ai/dsh-client-ui-conversation',
+  '@deepseek-ai/dsh-client-ui-renderer',
+  '@deepseek-ai/dsh-client-ui-session',
+  '@deepseek-ai/dsh-client-ui-slots',
+  '@deepseek-ai/dsh-llm',
+  '@deepseek-ai/dsh-session',
+  '@deepseek-ai/dsh-system-prompt',
+  '@deepseek-ai/dsh-tools',
+]) {
+  assert.equal(packageJson.devDependencies?.[name], '0.1.2-alpha.3', `${name} must match DSH Desktop alpha.3`)
+}
+assert.equal(packageJson.peerDependencies?.['@deepseek-ai/dsh-client-runtime'], undefined)
 
 assert.equal(await readFile(join(root, '.npmrc'), 'utf8'), '@deepseek-ai:registry=https://registry.npmjs.org/\n')
 assert.equal(Object.keys(packageJson.exports ?? {}).some(key => key.startsWith('./src')), false)
@@ -80,6 +121,7 @@ const scanned = [
   ...(await filesBelow('shared')),
   ...(await filesBelow('docs')),
   ...(await filesBelow('.agents')),
+  ...(await filesBelow('.i18n')),
   join(root, 'README.md'),
   join(root, 'README.zh.md'),
   join(root, 'package.json'),

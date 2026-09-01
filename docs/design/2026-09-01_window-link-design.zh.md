@@ -2,7 +2,7 @@
 
 [English](2026-09-01_window-link-design.md) | 中文
 
-本参考文档定义 `@deepseek-ai/dsh-window-link` 负责的协议、授权、投递和浏览器边界。
+本参考文档定义 `@vibeinging/dsh-window-link` 负责的协议、授权、投递和浏览器边界。
 
 ## 范围
 
@@ -32,8 +32,12 @@
 
 ## 浏览器集成
 
-浏览器入口注册到 `conversation.session.header.actions`，并从标准会话 slot 属性中接收 `sessionId`。它会序列化规范链接，通过浏览器 Clipboard API 写入剪贴板，同时以 `execCommand('copy')` 作为降级方案，并为闲置、成功和失败状态提供本地化标签。其 CSS 和链接图标会打包到 `lib/client.js` 中；浏览器产物在运行时只导入 React。
+浏览器入口注册到 `conversation.session.header.actions`，并从标准会话 slot 属性中接收 `sessionId`。它向用户提供的操作名为**跟另一个窗口对话**。它会序列化规范链接，通过浏览器 Clipboard API 写入剪贴板，同时以 `execCommand('copy')` 作为降级方案，然后提示用户将链接粘贴到另一个窗口。其 CSS 和链接图标会打包到 `lib/client.js` 中；浏览器产物在运行时只导入 React。
+
+## SDK 和包边界
+
+本包面向 DSH `0.1.2-alpha.3`。DSH 功能包的 peer 依赖使用这一版本；Cordis `4.0.2`、Cordis Loader `1.0.3` 和 Schemastery `3.18.2` 是官方兼容的基础包版本。alpha.3 客户端入口使用 Cordis 客户端上下文和 `dsh.client` 包元数据。运行时和 TypeScript 路径都不会解析到 DSH 源码检出目录。
 
 ## 当前限制
 
-此版本不支持向冷会话投递任务。官方 Host API 网关提供正确的恢复或路由行为，但其 `0.0.1-rc.2` 外部 NPM 依赖图目前无法完成干净安装，因为注册表中缺少所需的传递依赖 SDK 包。插件保持活跃窗口契约，不会添加源码检出路径，也不会建立另一套持久化和路由系统。
+此版本不支持向冷会话投递任务。恢复或路由非活跃会话，需要在实时 `AgentRegistry` 之外制定持久化的会话归属和生命周期规则。插件保持活跃窗口契约，不会另建一套持久化和路由系统。

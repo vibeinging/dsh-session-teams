@@ -21,7 +21,7 @@ describe('real Loader composition', () => {
       ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
       ['@deepseek-ai/dsh-tools', ToolRegistry],
       ['@deepseek-ai/dsh-agent', AgentRegistry],
-      ['@deepseek-ai/dsh-window-link', WindowLink],
+      ['@vibeinging/dsh-window-link', WindowLink],
     ])
     context.loader.internal = {
       version: 'v2',
@@ -35,7 +35,7 @@ describe('real Loader composition', () => {
     await context.loader.create({ name: '@deepseek-ai/dsh-tools' })
     await context.loader.create({ name: '@deepseek-ai/dsh-agent' })
     await context.loader.create({
-      name: '@deepseek-ai/dsh-window-link',
+      name: '@vibeinging/dsh-window-link',
       config: { maxTaskChars: 1_000, maxRememberedMessages: 8, requestTimeoutMs: 30_000 },
     })
     await context.loader.await()

@@ -1,8 +1,11 @@
 {
-  "name": "@deepseek-ai/dsh-window-link",
+  "name": "@vibeinging/dsh-window-link",
   "description": "Consent-gated task delivery between DSH conversation windows",
   "version": "0.0.1",
-  "private": true,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/vibeinging/dsh-window-link.git"
@@ -33,14 +36,14 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ],
+      "platform": "web"
     }
-  },
-  "dshClient": {
-    "inject": [
-      "@deepseek-ai/dsh-client-locale",
-      "@deepseek-ai/dsh-client-ui-conversation"
-    ],
-    "platform": "web"
   },
   "files": [
     "lib/index.js",
@@ -61,36 +64,39 @@
     "check:rules": "node scripts/check-repository-rules.mjs",
     "check:docs": "node scripts/check-doc-pairs.mjs",
     "check:package": "node scripts/smoke-package.mjs",
-    "check": "pnpm run check:rules && pnpm run check:docs && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run check:package"
+    "check": "pnpm run check:rules && pnpm run check:docs && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run check:package",
+    "prepublishOnly": "pnpm run check"
   },
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@deepseek-ai/schemastery": "3.18.1-rc.1"
+    "@deepseek-ai/schemastery": "3.18.2"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "4.0.1-rc.1",
-    "@deepseek-ai/dsh-client-locale": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-client-runtime": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-conversation": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-slots": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-agent": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-llm": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-session": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-tools": "0.0.1-rc.2",
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/dsh-client-locale": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-client-ui-conversation": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-client-ui-renderer": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-client-ui-session": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-agent": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-llm": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-session": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-tools": "0.1.2-alpha.3",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "4.0.1-rc.1",
-    "@deepseek-ai/cordis-plugin-loader": "1.0.1-rc.1",
-    "@deepseek-ai/dsh-client-locale": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-client-runtime": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-conversation": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-slots": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-agent": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-llm": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-session": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-system-prompt": "0.0.1-rc.2",
-    "@deepseek-ai/dsh-tools": "0.0.1-rc.2",
+    "@deepseek-ai/cordis": "4.0.2",
+    "@deepseek-ai/cordis-plugin-loader": "1.0.3",
+    "@deepseek-ai/dsh-client-locale": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-client-ui-conversation": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-client-ui-renderer": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-client-ui-session": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-client-ui-slots": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-agent": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-llm": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-session": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-system-prompt": "0.1.2-alpha.3",
+    "@deepseek-ai/dsh-tools": "0.1.2-alpha.3",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^22.20.0",
     "@types/react": "~18.3.1",
