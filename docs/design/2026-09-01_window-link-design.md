@@ -32,7 +32,7 @@ Each call carries `message_id`; the tool creates one when the model omits it. `D
 
 ## Browser integration
 
-The browser entry registers in `conversation.session.header.actions` and receives `sessionId` from the standard session slot props. Its user-facing action is **Talk to another window**. It serializes the canonical link, writes it through the browser Clipboard API with an `execCommand('copy')` fallback, and then tells the user to paste it into another window. Its CSS and link icon are bundled into `lib/client.js`; the browser artifact imports only React at runtime.
+The browser entry registers in `conversation.session.header.actions` and receives `sessionId` from the standard session slot props. Its user-facing action is **Talk to another window**. It serializes the canonical link and first calls `navigator.clipboard.writeText()`. An unavailable or rejected Clipboard API continues to a temporary off-screen textarea and `document.execCommand('copy')`; only both paths failing reports copy failure. Its CSS and link icon are bundled into `lib/client.js`; the browser artifact imports only React at runtime.
 
 ## SDK and package boundary
 

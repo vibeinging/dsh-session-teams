@@ -12,7 +12,9 @@ An ordinary DSH window needs a compact address that a user can copy into another
 
 `@vibeinging/dsh-window-link` is an independent plugin packaged for public NPM distribution. The browser action copies `dsh://session/<session-id>`, and the `send_window_task` tool accepts a destination only when that complete link occurs in the current step's direct user message. The plugin uses the official NPM SDK, mounts through `cordis.patch.yml`, and neither forks nor modifies DSH source.
 
-The first version addresses ordinary sessions active in one Host process. It resolves the destination through `AgentRegistry` and calls `agent.followup()` with a versioned user-role envelope. Tool success means queue acceptance, not execution or completion.
+The plugin addresses ordinary sessions active in one Host process. It resolves the destination through `AgentRegistry` and calls `agent.followup()` with a versioned user-role envelope. Tool success means queue acceptance, not execution or completion.
+
+The browser action first tries `navigator.clipboard.writeText()`. An unavailable or rejected Clipboard API falls through to a temporary off-screen textarea and `document.execCommand('copy')`; only both paths failing reports failure. This keeps the action usable when an Electron embedded page denies the modern API but permits document copy.
 
 ## Security boundary
 
@@ -36,7 +38,7 @@ Every delivery has a `message_id`. A bounded process-local ledger shares the fir
 
 ## Verification
 
-Focused tests pin strict parsing, current-step authority, plugin-context exclusion, relay denial, ordinary-session checks, queue wording, duplicate sharing and conflicts, and browser copy feedback. A real Cordis Loader composition assembles the DSH `0.1.2-alpha.3` `SystemPrompt`, `ToolRegistry`, `AgentRegistry`, and the plugin, then verifies the registered `send_window_task` schema. The public package runs its full check through `prepublishOnly`; the host and browser builds and the audited package contents contain no DSH source-checkout path or local dependency protocol.
+Focused tests pin strict parsing, current-step authority, plugin-context exclusion, relay denial, ordinary-session checks, queue wording, duplicate sharing and conflicts, browser Clipboard rejection fallback, and final copy failure feedback. A real Cordis Loader composition assembles the DSH `0.1.2-alpha.3` `SystemPrompt`, `ToolRegistry`, `AgentRegistry`, and the plugin, then verifies the registered `send_window_task` schema. The public package runs its full check through `prepublishOnly`; the host and browser builds and the audited package contents contain no DSH source-checkout path or local dependency protocol.
 
 ## Consequences
 

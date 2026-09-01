@@ -12,7 +12,9 @@ Status: implemented
 
 `@vibeinging/dsh-window-link` 是一个为公开 NPM 分发而打包的独立插件。浏览器操作会复制 `dsh://session/<session-id>`；只有当完整的目标链接出现在当前步骤中由用户直接输入的消息里时，`send_window_task` 工具才会接受该目标。插件使用官方 NPM SDK，通过 `cordis.patch.yml` 挂载，既不 fork，也不修改 DSH 源码。
 
-首个版本面向同一 Host 进程内的活跃普通会话。它通过 `AgentRegistry` 解析目标，并调用 `agent.followup()` 投递带有版本标记的用户角色信封。工具成功只表示队列已接受任务，不表示任务已执行或完成。
+该插件面向同一 Host 进程内的活跃普通会话。它通过 `AgentRegistry` 解析目标，并调用 `agent.followup()` 投递带有版本标记的用户角色信封。工具成功只表示队列已接受任务，不表示任务已执行或完成。
+
+浏览器操作会先尝试 `navigator.clipboard.writeText()`。如果 Clipboard API 不可用或调用遭到拒绝，操作会继续创建一个临时的屏幕外 textarea，并调用 `document.execCommand('copy')`；只有两条路径都失败时才报告失败。这样，即使 Electron 嵌入页面拒绝现代 API 但允许文档复制，该操作仍然可用。
 
 ## 安全边界
 
@@ -36,7 +38,7 @@ Status: implemented
 
 ## 验证
 
-聚焦测试固定验证严格解析、当前步骤授权、插件上下文排除、转发阻断、普通会话检查、队列文案、重复调用共享与冲突，以及浏览器复制反馈。真实的 Cordis Loader 组合会装配 DSH `0.1.2-alpha.3` 的 `SystemPrompt`、`ToolRegistry`、`AgentRegistry` 和该插件，然后验证已注册的 `send_window_task` schema。公开包通过 `prepublishOnly` 运行完整检查；Host 与浏览器构建和经过审计的包内容都不包含 DSH 源码检出路径或本地依赖协议。
+聚焦测试固定验证严格解析、当前步骤授权、插件上下文排除、转发阻断、普通会话检查、队列文案、重复调用共享与冲突、浏览器 Clipboard 请求被拒绝后的降级处理，以及最终复制失败反馈。真实的 Cordis Loader 组合会装配 DSH `0.1.2-alpha.3` 的 `SystemPrompt`、`ToolRegistry`、`AgentRegistry` 和该插件，然后验证已注册的 `send_window_task` schema。公开包通过 `prepublishOnly` 运行完整检查；Host 与浏览器构建和经过审计的包内容都不包含 DSH 源码检出路径或本地依赖协议。
 
 ## 结果
 

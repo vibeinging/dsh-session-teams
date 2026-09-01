@@ -22,7 +22,7 @@
 请将已发布的包安装到需要提供该操作和工具的每个 profile 中。由于 DSH profile 是 pnpm 工作区根目录，必须使用 `-w`：
 
 ```sh
-dsh plugin --profile web add -w @vibeinging/dsh-window-link@0.0.1
+dsh plugin --profile web add -w @vibeinging/dsh-window-link@0.0.2
 ```
 
 启动 profile 前请检查组合后的配置；其中必须包含 `window-link` 条目：
@@ -40,7 +40,7 @@ dsh plugin --profile web remove -w @vibeinging/dsh-window-link
 
 ## 使用
 
-1. 在目标窗口中选择会话标题栏里的**跟另一个窗口对话**。该操作会复制 `dsh://session/<session-id>`，并提示你将其粘贴到另一个窗口。
+1. 在目标窗口中选择会话标题栏里的**跟另一个窗口对话**。该操作会复制 `dsh://session/<session-id>`，并提示你将其粘贴到另一个窗口。如果嵌入页面拒绝 Clipboard API，该操作会先尝试文档复制降级方案，之后才报告失败。
 2. 将完整链接粘贴到源窗口的直接消息中，并说明任务内容。
 3. 模型调用 `send_window_task`。`accepted` 结果表示目标窗口已将任务排入下一轮次的队列；不表示任务已完成。
 

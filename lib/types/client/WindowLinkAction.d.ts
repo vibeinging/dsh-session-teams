@@ -4,7 +4,7 @@ export type WindowLinkActionProps = PropsRuntime<'conversation.session.header.ac
 /**
  * Write the session link through the browser clipboard surface.
  * @param text - Exact canonical deep link.
- * @returns Whether the host accepted the copy.
+ * @returns Whether either browser clipboard path accepted the copy.
  */
 export declare function writeWindowLinkClipboard(text: string): Promise<boolean>;
 /** Copy the current session link and expose success or failure to assistive text. */

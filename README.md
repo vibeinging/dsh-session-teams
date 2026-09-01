@@ -22,7 +22,7 @@ English | [中文](README.zh.md)
 Install the published package into each profile that should expose the action and tool. `-w` is required because a DSH profile is a pnpm workspace root:
 
 ```sh
-dsh plugin --profile web add -w @vibeinging/dsh-window-link@0.0.1
+dsh plugin --profile web add -w @vibeinging/dsh-window-link@0.0.2
 ```
 
 Inspect the composed configuration before starting the profile; it must contain the `window-link` entry:
@@ -40,7 +40,7 @@ dsh plugin --profile web remove -w @vibeinging/dsh-window-link
 
 ## Use
 
-1. In the target window, select **Talk to another window** in the conversation header. The action copies `dsh://session/<session-id>` and prompts you to paste it into another window.
+1. In the target window, select **Talk to another window** in the conversation header. The action copies `dsh://session/<session-id>` and prompts you to paste it into another window. If an embedded page rejects the Clipboard API, the action tries the document copy fallback before reporting failure.
 2. Paste the complete link into a direct message in the source window and describe the task.
 3. The model calls `send_window_task`. An `accepted` result means the target window queued the task for its next turn; it does not mean the task completed.
 

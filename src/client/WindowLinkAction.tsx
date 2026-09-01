@@ -12,7 +12,7 @@ export type WindowLinkActionProps =
 /**
  * Write the session link through the browser clipboard surface.
  * @param text - Exact canonical deep link.
- * @returns Whether the host accepted the copy.
+ * @returns Whether either browser clipboard path accepted the copy.
  */
 export async function writeWindowLinkClipboard(text: string): Promise<boolean> {
   /* oxlint-disable-next-line typescript/no-unnecessary-condition */
@@ -21,7 +21,7 @@ export async function writeWindowLinkClipboard(text: string): Promise<boolean> {
       await navigator.clipboard.writeText(text)
       return true
     } catch {
-      return false
+      // Electron may deny the Clipboard API while permitting the DOM fallback.
     }
   }
   /* oxlint-disable typescript/no-deprecated */

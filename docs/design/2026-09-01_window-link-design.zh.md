@@ -32,7 +32,7 @@
 
 ## 浏览器集成
 
-浏览器入口注册到 `conversation.session.header.actions`，并从标准会话 slot 属性中接收 `sessionId`。它向用户提供的操作名为**跟另一个窗口对话**。它会序列化规范链接，通过浏览器 Clipboard API 写入剪贴板，同时以 `execCommand('copy')` 作为降级方案，然后提示用户将链接粘贴到另一个窗口。其 CSS 和链接图标会打包到 `lib/client.js` 中；浏览器产物在运行时只导入 React。
+浏览器入口注册到 `conversation.session.header.actions`，并从标准会话 slot 属性中接收 `sessionId`。它向用户提供的操作名为**跟另一个窗口对话**。它会序列化规范链接，并先调用 `navigator.clipboard.writeText()`。当 Clipboard API 不可用或调用遭到拒绝时，操作会继续创建一个临时的屏幕外 textarea，并调用 `document.execCommand('copy')`；只有两条路径都失败时才报告复制失败。其 CSS 和链接图标会打包到 `lib/client.js` 中；浏览器产物在运行时只导入 React。
 
 ## SDK 和包边界
 
