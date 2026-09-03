@@ -1,15 +1,95 @@
-/** Simplified Chinese dictionary (the key-set source of truth). */
+/** Simplified Chinese dictionary and English parity for the conversation directory. */
 export declare const zh: {
-    'copy.label': string;
-    'copy.success': string;
-    'copy.failure': string;
+    'trigger.label': string;
+    'trigger.count': string;
+    'trigger.team': string;
+    'panel.title': string;
+    'panel.subtitle': string;
+    'panel.count': string;
+    'current.label': string;
+    'current.fallback': string;
+    'current.leader': string;
+    'window.list': string;
+    'window.available': string;
+    'window.working': string;
+    'window.compose': string;
+    'composer.target': string;
+    'search.placeholder': string;
+    'search.empty': string;
+    'group.current': string;
+    'group.unnamed': string;
+    'team.title': string;
+    'team.progress': string;
+    'team.members': string;
+    'team.active': string;
+    'team.members.label': string;
+    'team.hint': string;
+    'other.title': string;
+    'other.count': string;
+    'task.coordinating': string;
+    'task.blocked': string;
+    'task.ready': string;
+    'task.queued': string;
+    'task.running': string;
+    'task.completed': string;
+    'task.failed': string;
+    'empty.title': string;
+    'empty.body': string;
+    'hint.ready': string;
+    'hint.empty': string;
+    'message.from': string;
+    'message.open': string;
+    'message.unavailable': string;
+    'message.copy': string;
+    'message.copied': string;
 };
-/** Window-link namespace key union. */
-export type WindowLinkKey = keyof typeof zh;
+/** Window-collaboration namespace key union. */
+export type WindowCollaborationKey = keyof typeof zh;
+/** Compatibility alias for the original client key type. */
+export type WindowLinkKey = WindowCollaborationKey;
 /** English dictionary, checked complete against the Chinese key set. */
 export declare const en: {
-    'copy.label': string;
-    'copy.success': string;
-    'copy.failure': string;
+    'trigger.label': string;
+    'trigger.count': string;
+    'trigger.team': string;
+    'panel.title': string;
+    'panel.subtitle': string;
+    'panel.count': string;
+    'current.label': string;
+    'current.fallback': string;
+    'current.leader': string;
+    'window.list': string;
+    'window.available': string;
+    'window.working': string;
+    'window.compose': string;
+    'composer.target': string;
+    'search.placeholder': string;
+    'search.empty': string;
+    'group.current': string;
+    'group.unnamed': string;
+    'team.title': string;
+    'team.progress': string;
+    'team.members': string;
+    'team.active': string;
+    'team.members.label': string;
+    'team.hint': string;
+    'other.title': string;
+    'other.count': string;
+    'task.coordinating': string;
+    'task.blocked': string;
+    'task.ready': string;
+    'task.queued': string;
+    'task.running': string;
+    'task.completed': string;
+    'task.failed': string;
+    'empty.title': string;
+    'empty.body': string;
+    'hint.ready': string;
+    'hint.empty': string;
+    'message.from': string;
+    'message.open': string;
+    'message.unavailable': string;
+    'message.copy': string;
+    'message.copied': string;
 };
 //# sourceMappingURL=locales.d.ts.map

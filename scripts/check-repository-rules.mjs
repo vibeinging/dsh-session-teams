@@ -14,7 +14,7 @@ const forbiddenCheckout = new RegExp([
 ].join(''), 'u')
 const emoji = /[\p{Emoji_Presentation}\uFE0F\u200D\p{Regional_Indicator}\u2600-\u27BF]/u
 
-assert.equal(packageJson.name, '@vibeinging/dsh-window-link')
+assert.equal(packageJson.name, '@vibeinging/dsh-session-teams')
 assert.equal(packageJson.private, undefined, 'public package must not set private')
 assert.deepEqual(packageJson.publishConfig, {
   access: 'public',
@@ -25,7 +25,9 @@ assert.equal(packageJson.engines?.node, '^22.19.0 || >=24.0.0')
 assert.equal(packageJson.dsh?.bundle?.patch, './cordis.patch.yml')
 assert.equal(packageJson.dsh?.client?.platform, 'web')
 assert.deepEqual(packageJson.dsh?.client?.inject, [
+  '@deepseek-ai/dsh-api-session-controller',
   '@deepseek-ai/dsh-client-locale',
+  '@deepseek-ai/dsh-client-ui-chat',
   '@deepseek-ai/dsh-client-ui-conversation',
 ])
 assert.equal(packageJson.dshClient, undefined, 'legacy dshClient metadata is not accepted')
@@ -68,17 +70,26 @@ assert.deepEqual({
 })
 for (const name of [
   '@deepseek-ai/dsh-agent',
+  '@deepseek-ai/dsh-api-session-controller',
   '@deepseek-ai/dsh-client-locale',
   '@deepseek-ai/dsh-client-ui-conversation',
   '@deepseek-ai/dsh-client-ui-renderer',
   '@deepseek-ai/dsh-client-ui-session',
-  '@deepseek-ai/dsh-client-ui-slots',
   '@deepseek-ai/dsh-llm',
   '@deepseek-ai/dsh-session',
+  '@deepseek-ai/dsh-session-persistence',
+  '@deepseek-ai/dsh-session-projection',
+  '@deepseek-ai/dsh-session-title',
   '@deepseek-ai/dsh-system-prompt',
   '@deepseek-ai/dsh-tools',
 ]) {
-  assert.equal(packageJson.devDependencies?.[name], '0.1.2-alpha.3', `${name} must match DSH Desktop alpha.3`)
+  assert.equal(packageJson.devDependencies?.[name], '0.1.2-rc.1', `${name} must match DSH Desktop rc.1`)
+}
+for (const name of [
+  '@deepseek-ai/dsh-client-ui-chat',
+  '@deepseek-ai/dsh-client-ui-slots',
+]) {
+  assert.equal(packageJson.devDependencies?.[name], '0.1.2-alpha.5', `${name} must match DSH Desktop rc.1 (no rc.1 was published for this package)`)
 }
 assert.equal(packageJson.peerDependencies?.['@deepseek-ai/dsh-client-runtime'], undefined)
 

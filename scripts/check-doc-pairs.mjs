@@ -7,9 +7,10 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const pairs = [
   { english: 'README.md', record: '.i18n/README.i18n.yaml' },
-  { english: 'docs/design/2026-09-01_window-link-design.md' },
+  { english: 'docs/design/2026-09-01_session-teams-design.md' },
+  { english: 'docs/research/2026-09-02_alpha-4-agent-messaging.md' },
   { english: 'docs/reports/2026-09-01_public-npm-readiness.md' },
-  { english: '.agents/notes/implemented/feature/2026-09-01-window-link.md' },
+  { english: '.agents/notes/implemented/feature/2026-09-01-session-teams.md' },
 ]
 
 function blobHash(content) {

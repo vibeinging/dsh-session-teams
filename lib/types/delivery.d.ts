@@ -1,7 +1,8 @@
-/** Task delivery and process-local duplicate suppression. */
-import type { AgentRegistry } from '@deepseek-ai/dsh-agent';
+/** Conversation-window message delivery and duplicate suppression. */
+import type { Agent, AgentRegistry } from '@deepseek-ai/dsh-agent';
 import type { SessionId } from '@deepseek-ai/dsh-session';
-/** Stable tool result returned for every non-cancelled delivery attempt. */
+import { type WindowMessage } from './protocol.ts';
+/** Stable tool result returned for every non-cancelled message attempt. */
 export interface WindowTaskResult {
     /** Accepted means queued; rejected means definitely not queued. */
     readonly status: 'accepted' | 'rejected';
@@ -14,11 +15,9 @@ export interface WindowTaskResult {
     /** Short model-facing explanation. */
     readonly message: string;
 }
-/**
- * Process-local duplicate suppression keyed by caller-visible message id.
- * Completed records remain until capacity eviction; no result is claimed to
- * survive a Host restart.
- */
+/** Public name matching conversation-window behavior. */
+export type WindowMessageResult = WindowTaskResult;
+/** Process-local duplicate suppression keyed by caller-visible message id. */
 export declare class DeliveryLedger {
     #private;
     private readonly maxEntries;
@@ -26,36 +25,36 @@ export declare class DeliveryLedger {
     constructor(maxEntries: number);
     /** Number of retained message ids, exposed for invariant-style tests. */
     get size(): number;
-    /** Forget all retained process-local receipts during plugin disposal. */
+    /** Forget process-local receipts during plugin disposal. */
     clear(): void;
-    /**
-     * Run a delivery once for a message id and exact payload.
-     * @param messageId - Caller-visible correlation key.
-     * @param fingerprint - Exact target and task identity.
-     * @param deliver - Side effect executed only for a new id.
-     * @returns Shared first result, or a definite refusal for conflict/capacity.
-     */
+    /** Run a delivery once for one message id and exact payload. */
     run(messageId: string, fingerprint: string, targetLink: string, deliver: () => Promise<WindowTaskResult>): Promise<WindowTaskResult>;
 }
-/** Values for one gateway delivery. */
-export interface DeliverWindowTaskOptions {
-    /** Official live-agent directory for the current Host. */
-    readonly agents: Pick<AgentRegistry, 'get'>;
-    /** Calling top-level session. */
-    readonly sourceSessionId: SessionId;
-    /** Receiving top-level session. */
-    readonly targetSessionId: SessionId;
-    /** Caller-visible correlation key. */
-    readonly messageId: string;
-    /** Exact user task text. */
-    readonly task: string;
+/** Values for one already-resolved conversation-window delivery. */
+export interface DeliverWindowMessageOptions extends WindowMessage {
+    /** Exact live ordinary Agent selected by the directory. */
+    readonly target: Agent;
+    /** Model messages steer current work; scheduled tasks open a distinct turn. */
+    readonly delivery?: 'steer' | 'queue';
     /** Tool cancellation signal checked before the synchronous queue boundary. */
     readonly signal: AbortSignal;
 }
-/**
- * Deliver one versioned envelope to an active ordinary agent on this Host.
- * @param options - Source, target, payload, agent directory, and cancellation.
- * @returns Accepted or definitely rejected receipt.
- */
+/** Deliver one versioned relay to one ordinary conversation window. */
+export declare function deliverWindowMessage(options: DeliverWindowMessageOptions): Promise<WindowTaskResult>;
+/** Verify the exact live top-level Agent selected by the directory. */
+export declare function resolveTargetWindow(target: Agent | undefined, targetSessionId: SessionId): Agent | {
+    readonly code: 'target-not-active' | 'target-not-window' | 'target-mismatch';
+    readonly message: string;
+};
+/** Compatibility options for the task-only API. */
+export interface DeliverWindowTaskOptions {
+    readonly agents: Pick<AgentRegistry, 'get'>;
+    readonly sourceSessionId: SessionId;
+    readonly targetSessionId: SessionId;
+    readonly messageId: string;
+    readonly task: string;
+    readonly signal: AbortSignal;
+}
+/** Compatibility wrapper that queues one task in an active target. */
 export declare function deliverWindowTask(options: DeliverWindowTaskOptions): Promise<WindowTaskResult>;
 //# sourceMappingURL=delivery.d.ts.map

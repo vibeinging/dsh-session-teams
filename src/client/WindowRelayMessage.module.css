@@ -1,0 +1,179 @@
+.row {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.stack {
+  display: flex;
+  width: fit-content;
+  max-width: min(72%, 560px);
+  min-width: 156px;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.card {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--dsw-alias-state-business-primary) 16%, var(--dsw-alias-border-l2));
+  border-radius: 12px 12px 4px 12px;
+  color: var(--dsw-alias-label-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-tertiary) 54%, var(--dsw-alias-bg-base));
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--dsw-alias-label-primary) 5%, transparent);
+}
+
+.sourceButton,
+.sourceStatic {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  grid-template-columns: 20px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px 6px;
+  color: var(--dsw-alias-label-primary);
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 7%, transparent);
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--dsw-alias-state-business-primary) 12%, var(--dsw-alias-border-l2));
+  font: inherit;
+  text-align: left;
+}
+
+.sourceButton {
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.sourceButton:hover {
+  background: color-mix(in srgb, var(--dsw-alias-state-business-primary) 12%, transparent);
+}
+
+.sourceButton:focus-visible,
+.copyButton:focus-visible {
+  outline: 2px solid var(--dsw-alias-stroke-focus);
+  outline-offset: -2px;
+}
+
+.sourceIcon,
+.chevron,
+.actionIcon {
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sourceIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--dsw-alias-state-business-primary);
+  stroke-width: 1.25;
+}
+
+.sourceText {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.sourceContext {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+  line-height: 16px;
+}
+
+.sourceName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--dsw-alias-state-business-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--dsw-alias-label-tertiary);
+  stroke-width: 1.35;
+  transition: transform 120ms ease, color 120ms ease;
+}
+
+.sourceButton:hover .chevron {
+  color: var(--dsw-alias-state-business-primary);
+  transform: translateX(1px);
+}
+
+.sourceStatic {
+  grid-template-columns: 20px minmax(0, 1fr);
+}
+
+.sourceStatic .sourceIcon,
+.sourceStatic .sourceName {
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.body {
+  padding: 8px 11px 9px;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.actions {
+  display: flex;
+  height: 24px;
+  align-items: center;
+  gap: 3px;
+  padding-right: 2px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 20px;
+}
+
+.copyButton {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--dsw-alias-label-tertiary);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.copyButton:hover {
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.actionIcon {
+  width: 13px;
+  height: 13px;
+  stroke-width: 1.2;
+}
+
+@media (max-width: 720px) {
+  .stack {
+    max-width: 86%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sourceButton,
+  .chevron {
+    transition: none;
+  }
+}

@@ -1,24 +1,17 @@
-/** Current-turn authorization derived from the authoritative session log. */
-import type { SessionEvent, SessionId, UserMessage } from '@deepseek-ai/dsh-session';
-/** Result of checking whether the current human prompt grants one target. */
-export type WindowLinkAuthority = {
-    readonly ok: true;
-} | {
-    readonly ok: false;
-    readonly code: 'missing-agent' | 'missing-direct-message' | 'relay-denied' | 'link-not-authorized';
-    readonly message: string;
-};
-/**
- * Find direct user messages entered into the currently executing step.
- * @param events - Calling agent's authoritative event log.
- * @returns Direct user messages after the newest `step/start` boundary.
- */
+/** Current-turn routing facts derived from the authoritative session log. */
+import type { SessionEvent, UserMessage } from '@deepseek-ai/dsh-session';
+import { type WindowMessage } from './protocol.ts';
+interface TeamTaskAssignment extends WindowMessage {
+    readonly teamId: string;
+    readonly taskId: string;
+}
+/** Find direct human messages entered into the currently executing step. */
 export declare function currentDirectMessages(events: readonly SessionEvent[]): UserMessage[];
-/**
- * Require the target link in this step's direct user input and deny relays.
- * @param events - Calling agent's authoritative event log, or undefined when no agent owns the call.
- * @param targetSessionId - Parsed destination.
- * @returns Explicit grant or stable refusal.
- */
-export declare function authorizeWindowLink(events: readonly SessionEvent[] | undefined, targetSessionId: SessionId): WindowLinkAuthority;
+/** Find direct human messages admitted since the current turn began. */
+export declare function currentTurnDirectMessages(events: readonly SessionEvent[]): UserMessage[];
+/** Read the newest trusted window relay admitted into the current turn. */
+export declare function currentWindowRelay(events: readonly SessionEvent[]): WindowMessage | undefined;
+/** Read the newest durable task assignment without letting ordinary relays shadow it. */
+export declare function latestTeamTaskAssignment(events: readonly SessionEvent[]): TeamTaskAssignment | undefined;
+export {};
 //# sourceMappingURL=authority.d.ts.map

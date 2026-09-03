@@ -1,28 +1,25 @@
-/** Current-turn authorization derived from the authoritative session log. */
-import type { SessionEvent, SessionId, UserMessage } from '@deepseek-ai/dsh-session'
-import { extractWindowLinks, FORWARDED_TASK_PREFIX } from './protocol.ts'
+/** Current-turn routing facts derived from the authoritative session log. */
+import type { SessionEvent, UserMessage } from '@deepseek-ai/dsh-session'
+import {
+  isHumanUserSource,
+  isSessionTeamsPlugin,
+  parseVisibleWindowMessage,
+  parseWindowMessage,
+  parseWindowRelayMessage,
+  type WindowMessage,
+} from './protocol.ts'
 
-/** Result of checking whether the current human prompt grants one target. */
-export type WindowLinkAuthority =
-  | { readonly ok: true }
-  | {
-    readonly ok: false
-    readonly code: 'missing-agent' | 'missing-direct-message' | 'relay-denied' | 'link-not-authorized'
-    readonly message: string
-  }
-
-/** Collapse only text blocks; non-text content never carries a deep-link grant. */
-function messageText(message: UserMessage): string {
-  return message.content
-    .flatMap(block => block.type === 'text' ? [block.text] : [])
-    .join('\n')
+interface TeamTaskAssignment extends WindowMessage {
+  readonly teamId: string
+  readonly taskId: string
 }
 
-/**
- * Find direct user messages entered into the currently executing step.
- * @param events - Calling agent's authoritative event log.
- * @returns Direct user messages after the newest `step/start` boundary.
- */
+/** Collapse only text blocks from one model-visible user message. */
+function messageText(message: UserMessage): string {
+  return message.content.flatMap(block => block.type === 'text' ? [block.text] : []).join('\n')
+}
+
+/** Find direct human messages entered into the currently executing step. */
 export function currentDirectMessages(events: readonly SessionEvent[]): UserMessage[] {
   const stepStart = events.findLastIndex(event => event.type === 'step/start')
   if (stepStart < 0) return []
@@ -30,41 +27,59 @@ export function currentDirectMessages(events: readonly SessionEvent[]): UserMess
   for (let index = stepStart + 1; index < events.length; index += 1) {
     const event = events[index]
     if (event?.type === 'step/end') break
-    if (event?.type === 'user/message' && event.data.source.kind === 'user') {
-      messages.push(event.data)
-    }
+    if (event?.type === 'user/message' && isHumanUserSource(event.data.source)) messages.push(event.data)
   }
   return messages
 }
 
-/**
- * Require the target link in this step's direct user input and deny relays.
- * @param events - Calling agent's authoritative event log, or undefined when no agent owns the call.
- * @param targetSessionId - Parsed destination.
- * @returns Explicit grant or stable refusal.
- */
-export function authorizeWindowLink(
-  events: readonly SessionEvent[] | undefined,
-  targetSessionId: SessionId,
-): WindowLinkAuthority {
-  if (events === undefined) {
-    return { ok: false, code: 'missing-agent', message: 'window task delivery requires an agent-owned tool call' }
+/** Find direct human messages admitted since the current turn began. */
+export function currentTurnDirectMessages(events: readonly SessionEvent[]): UserMessage[] {
+  const turnStart = events.findLastIndex(event => event.type === 'turn/start')
+  if (turnStart < 0) return []
+  const messages: UserMessage[] = []
+  for (let index = turnStart + 1; index < events.length; index += 1) {
+    const event = events[index]
+    if (event?.type === 'turn/end') break
+    if (event?.type === 'user/message' && isHumanUserSource(event.data.source)) messages.push(event.data)
   }
-  const direct = currentDirectMessages(events)
-  if (direct.length === 0) {
-    return { ok: false, code: 'missing-direct-message', message: 'no direct user message exists in the current step' }
+  return messages
+}
+
+/** Read the newest trusted window relay admitted into the current turn. */
+export function currentWindowRelay(events: readonly SessionEvent[]): WindowMessage | undefined {
+  const turnStart = events.findLastIndex(event => event.type === 'turn/start')
+  if (turnStart < 0) return undefined
+  for (let index = events.length - 1; index > turnStart; index -= 1) {
+    const event = events[index]
+    if (event === undefined) continue
+    if (event?.type === 'turn/end') return undefined
+    const relay = trustedWindowRelay(event)
+    if (relay !== undefined) return relay
   }
-  const texts = direct.map(messageText)
-  if (texts.some(text => text.includes(FORWARDED_TASK_PREFIX))) {
-    return { ok: false, code: 'relay-denied', message: 'a forwarded task cannot forward another task' }
+  return undefined
+}
+
+/** Read the newest durable task assignment without letting ordinary relays shadow it. */
+export function latestTeamTaskAssignment(events: readonly SessionEvent[]): TeamTaskAssignment | undefined {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index]
+    if (event === undefined) continue
+    const relay = trustedWindowRelay(event)
+    if (relay?.teamId !== undefined && relay.taskId !== undefined) {
+      return { ...relay, teamId: relay.teamId, taskId: relay.taskId }
+    }
   }
-  const authorized = texts.some(text =>
-    extractWindowLinks(text).some(link => link.sessionId === targetSessionId))
-  return authorized
-    ? { ok: true }
-    : {
-        ok: false,
-        code: 'link-not-authorized',
-        message: 'the complete target link must appear in the current direct user message',
-      }
+  return undefined
+}
+
+/** Parse one trusted registered, visible, or legacy window relay event. */
+function trustedWindowRelay(event: SessionEvent): WindowMessage | undefined {
+  if (event.type !== 'user/message') return undefined
+  const source = event.data.source
+  const registered = parseWindowRelayMessage(source, messageText(event.data))
+  if (registered !== undefined) return registered
+  const visible = parseVisibleWindowMessage(source, messageText(event.data))
+  if (visible !== undefined) return visible
+  if (source.kind !== 'plugin' || !isSessionTeamsPlugin(source.plugin) || source.form !== 'relay') return undefined
+  return parseWindowMessage(messageText(event.data))
 }

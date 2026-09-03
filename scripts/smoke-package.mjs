@@ -12,7 +12,7 @@ const packageJson = JSON.parse(await readFile(new URL('../package.json', import.
 const client = await readFile(new URL('../lib/client.js', import.meta.url), 'utf8')
 const host = await import(new URL('../lib/index.js', import.meta.url))
 
-assert.equal(packageJson.name, '@vibeinging/dsh-window-link')
+assert.equal(packageJson.name, '@vibeinging/dsh-session-teams')
 assert.equal(packageJson.private, undefined)
 assert.deepEqual(packageJson.publishConfig, {
   access: 'public',
@@ -22,13 +22,14 @@ assert.equal(packageJson.exports?.['.']?.default, './lib/index.js')
 assert.equal(packageJson.exports?.['./client']?.default, './lib/client.js')
 assert.equal(packageJson.dsh?.client?.platform, 'web')
 assert.match(client, /window\.__ModuleLoader__\.load\(/u)
-assert.match(client, /@vibeinging\/dsh-window-link/u)
+assert.match(client, /@vibeinging\/dsh-session-teams/u)
 assert.match(client, /conversation\.session\.header\.actions/u)
-assert.match(client, /dsh:\/\/session\//u)
+assert.match(client, /session-teams-directory/u)
+assert.match(client, /data-window-count/u)
 assert.match(client, /require\(["']react["']\)/u)
 assert.doesNotMatch(client, /require\(["']@deepseek-ai\//u)
 assert.equal(host.linkForSession('session-smoke'), 'dsh://session/session-smoke')
-assert.equal(host.name, 'window-link')
+assert.equal(host.name, 'session-teams')
 for (const file of ['lib/index.js', 'lib/client.js', 'lib/client.js.map', 'lib/types/index.d.ts', 'lib/types/client/index.d.ts']) {
   await access(new URL(`../${file}`, import.meta.url))
 }
@@ -59,4 +60,4 @@ for (const file of [
   assert.ok(packedPaths.includes(file), `npm pack is missing ${file}`)
 }
 
-console.log('package smoke: @vibeinging/dsh-window-link passed')
+console.log('package smoke: @vibeinging/dsh-session-teams passed')
