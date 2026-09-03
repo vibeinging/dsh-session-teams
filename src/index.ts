@@ -328,7 +328,7 @@ function renderListResult(value: WindowListResult): string {
     `code: ${value.code}`,
     `message: ${value.message}`,
     ...value.windows.map(window =>
-      `- title: ${window.title === null ? '(untitled)' : JSON.stringify(window.title)}; state: ${window.state}; target_link: ${window.targetLink}`),
+      `- target_link: ${window.targetLink}; title: ${window.title === null ? '(untitled)' : JSON.stringify(window.title)}; state: ${window.state}`),
   ].join('\n')
 }
 
@@ -462,15 +462,15 @@ export function createWindowMessageTool(
   return defineTool({
     name: 'send_window_message',
     description:
-      'Send a message to any ordinary DSH conversation visible to this Host. Use target_name with the exact displayed title; no connection or repeated session id is required. When replying to a window message, omit target_name entirely; the trusted source is used automatically. A relayed reply cannot be redirected to a different existing conversation. Windows decide whether another reply is useful. For a final team-task report, set task_outcome; the task id comes from the trusted assignment.',
+      'Send a message to any ordinary DSH conversation visible to this Host. Address it with target_link, the canonical link listed for each conversation; a title alone is never a safe address because titles can duplicate or be renamed. When replying to a window message, omit target_name entirely; the trusted source is used automatically. A relayed reply cannot be redirected to a different existing conversation. Windows decide whether another reply is useful. For a final team-task report, set task_outcome; the task id comes from the trusted assignment.',
     parameters: {
-      target_name: {
-        type: 'string',
-        description: 'Exact displayed title of the destination conversation. Prefer this when the user names a window.',
-      },
       target_link: {
         type: 'string',
-        description: 'Optional exact selector for internal routing or compatibility. Users normally do not need it.',
+        description: 'Canonical dsh://session/... link of the destination from the directory or list_conversation_windows. Prefer this; resolve a user-named window to its link first.',
+      },
+      target_name: {
+        type: 'string',
+        description: 'Optional fallback by exact displayed title. Only valid when exactly one conversation has that title.',
       },
       message: { type: 'string', required: true, description: 'Exact task, result, question, or reply to send.' },
       task_outcome: {
@@ -743,7 +743,8 @@ export function createWindowTeamTool(
       for (const member of normalizedMembers) {
         const matches = existing.filter(window => window.title === member.name)
         if (matches.length > 1) {
-          return rejectedTeam(teamId, 'target-name-ambiguous', `more than one conversation is named ${JSON.stringify(member.name)}`)
+          return rejectedTeam(teamId, 'target-name-ambiguous',
+            `more than one conversation is named ${JSON.stringify(member.name)}; rename the intended window or choose a unique new name`)
         }
       }
 
@@ -865,9 +866,10 @@ export function createAddWindowTaskTool(
   return defineTool({
     name: 'add_window_task',
     description:
-      'Add one new task after a window team already exists. Do not use this to build a graph known during create_window_team; put that graph in members[].tasks instead. Name an exact owner window and optional dependencies. Ready work starts automatically. Use only for a direct user request.',
+      'Add one new task after a window team already exists. Do not use this to build a graph known during create_window_team; put that graph in members[].tasks instead. Address the owner window with its target_link, or a title only when exactly one window has that title. Optional dependencies. Ready work starts automatically. Use only for a direct user request.',
     parameters: {
-      target_name: { type: 'string', required: true, description: 'Exact displayed title of the owner window.' },
+      target_link: { type: 'string', description: 'Canonical dsh://session/... link of the owner window from the directory. Prefer this.' },
+      target_name: { type: 'string', description: 'Optional fallback by exact displayed title, only when exactly one window has that title.' },
       title: { type: 'string', required: true, description: 'Short task label shown in the team panel.' },
       task: { type: 'string', required: true, description: 'Exact self-contained work instruction.' },
       task_id: { type: 'string', description: 'Stable 2-64 character id; omit to generate one.' },
@@ -891,9 +893,12 @@ export function createAddWindowTaskTool(
       const taskId = args.task_id?.trim() || `task-${randomUUID()}`
       const validation = validateNewTask(state, taskId, args.title, args.task, args.depends_on ?? [], args.max_attempts, config)
       if (validation !== undefined) return rejectedMutation(state.teamId, validation.code, validation.message)
-      const resolved = await directory.resolve(source, { targetName: args.target_name }, exec.signal)
+      const resolved = await directory.resolve(source, {
+        ...(args.target_name === undefined ? {} : { targetName: args.target_name }),
+        ...(args.target_link === undefined ? {} : { targetLink: args.target_link }),
+      }, exec.signal)
       if ('code' in resolved) return rejectedMutation(state.teamId, resolved.code, resolved.message)
-      const ownerName = resolved.window.title ?? args.target_name.trim()
+      const ownerName = resolved.window.title ?? args.target_name?.trim() ?? ''
       const ownerSessionId = String(resolved.window.sessionId)
       await coordinator.run(source.session, () => {
         const current = coordinator.current(source.session)
@@ -1005,10 +1010,11 @@ export function createReassignWindowTaskTool(
   return defineTool({
     name: 'reassign_window_task',
     description:
-      'Manually move a blocked, ready, or failed team task to another visible conversation. Running and completed work is not silently duplicated. Use only for a direct user request.',
+      'Manually move a blocked, ready, or failed team task to another visible conversation. Running and completed work is not silently duplicated. Address the new owner with its target_link, or a title only when exactly one window has that title. Use only for a direct user request.',
     parameters: {
       task_id: { type: 'string', required: true, description: 'Exact task id to move.' },
-      target_name: { type: 'string', required: true, description: 'Exact displayed title of the new owner window.' },
+      target_link: { type: 'string', description: 'Canonical dsh://session/... link of the new owner window from the directory. Prefer this.' },
+      target_name: { type: 'string', description: 'Optional fallback by exact displayed title, only when exactly one window has that title.' },
       owner_role: { type: 'string', description: 'Role used if the target is new to this team.' },
     },
     output: {
@@ -1024,10 +1030,13 @@ export function createReassignWindowTaskTool(
       }
       const before = coordinator.current(source.session)
       if (before === null) return rejectedMutation('', 'no-team', 'the current window has no team')
-      const resolved = await directory.resolve(source, { targetName: args.target_name }, exec.signal)
+      const resolved = await directory.resolve(source, {
+        ...(args.target_name === undefined ? {} : { targetName: args.target_name }),
+        ...(args.target_link === undefined ? {} : { targetLink: args.target_link }),
+      }, exec.signal)
       if ('code' in resolved) return rejectedMutation(before.teamId, resolved.code, resolved.message)
       const ownerSessionId = String(resolved.window.sessionId)
-      const ownerName = resolved.window.title ?? args.target_name.trim()
+      const ownerName = resolved.window.title ?? args.target_name?.trim() ?? ''
       let updated: WindowTeamTask | null = null
       try {
         await coordinator.run(source.session, () => {

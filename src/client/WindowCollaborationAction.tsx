@@ -3,6 +3,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } f
 import type { InputState } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { WindowTeamProjection, WindowTeamTask, WindowTeamTaskStatus } from '../team-types.ts'
+import { serializeWindowLink } from '../protocol.ts'
 import type { WindowCollaborationKey } from './locales.ts'
 import css from './WindowCollaborationAction.module.css'
 
@@ -31,6 +32,12 @@ interface WindowListItem {
   readonly displayTitle: string
   readonly running: boolean
   readonly cwd: string | undefined
+}
+
+/** One conversation a user can select from the panel, carrying its exact address. */
+interface WindowTarget {
+  readonly id: string
+  readonly displayTitle: string
 }
 
 /** Conversations of one workspace directory, ready to render as a group. */
@@ -121,8 +128,9 @@ export function WindowCollaborationAction({
     ? triggerCount === 0 ? 'trigger.label' : 'trigger.count'
     : 'trigger.team'
   const renderedTriggerLabel = t(triggerLabel, { count: triggerCount })
-  const selectWindow = (name: string) => {
-    inputActions.setDraft(composeWindowDraft(t('composer.target', { name }), draft))
+  const selectWindow = (target: WindowTarget) => {
+    const link = serializeWindowLink(target.id)
+    inputActions.setDraft(composeWindowDraft(t('composer.target', { name: target.displayTitle, link }), draft))
     setOpen(false)
     window.requestAnimationFrame(focusComposer)
   }
@@ -195,7 +203,7 @@ interface SharedViewProps {
   readonly windows: readonly WindowListItem[]
   readonly query: string
   readonly setQuery: (value: string) => void
-  readonly onSelectWindow: (name: string) => void
+  readonly onSelectWindow: (target: WindowTarget) => void
   readonly t: WindowCollaborationActionProps['t']
 }
 
@@ -300,7 +308,7 @@ function TeamView({
               task={primaryTask(team.tasks.filter(task => task.ownerSessionId === member.sessionId))}
               leader={false}
               complete={false}
-              onSelect={() => { onSelectWindow(title) }}
+              onSelect={() => { onSelectWindow({ id: member.sessionId, displayTitle: title }) }}
               t={t}
             />
           )
@@ -339,7 +347,7 @@ function TeamView({
 /** One directory list split into labeled workspace groups. */
 function GroupedConversationList({ groups, onSelectWindow, t, compact = false }: {
   readonly groups: readonly WindowGroup[]
-  readonly onSelectWindow: (name: string) => void
+  readonly onSelectWindow: (target: WindowTarget) => void
   readonly t: WindowCollaborationActionProps['t']
   readonly compact?: boolean
 }) {
@@ -483,7 +491,7 @@ function TaskStatus({ status, t }: { readonly status: WindowTeamTaskStatus; read
 
 function ConversationList({ windows, onSelectWindow, t, compact = false }: {
   readonly windows: readonly WindowListItem[]
-  readonly onSelectWindow: (name: string) => void
+  readonly onSelectWindow: (target: WindowTarget) => void
   readonly t: WindowCollaborationActionProps['t']
   readonly compact?: boolean
 }) {
@@ -496,7 +504,7 @@ function ConversationList({ windows, onSelectWindow, t, compact = false }: {
             className={css.windowRow}
             aria-label={t('window.compose', { name: window.displayTitle })}
             title={t('window.compose', { name: window.displayTitle })}
-            onClick={() => { onSelectWindow(window.displayTitle) }}
+            onClick={() => { onSelectWindow({ id: window.id, displayTitle: window.displayTitle }) }}
           >
             <span className={css.smallAvatar} aria-hidden="true">{initial(window.displayTitle)}</span>
             <span className={css.windowTitle}>{window.displayTitle}</span>

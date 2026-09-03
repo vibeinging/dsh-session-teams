@@ -12,7 +12,7 @@ The plugin is an independent package built only on official NPM SDKs. It is not 
 
 ## What you can do
 
-- **Talk to any conversation window.** Ask a window by its exact displayed title to check, build, or explain something. The receiver sees a compact message card and answers in that same conversation.
+- **Talk to any conversation window.** Ask a window by its name to check, build, or explain something; the model resolves the name to that window's directory link. The receiver sees a compact message card and answers in that same conversation.
 - **Lead a window team.** Create named role windows, give each one tasks and dependencies, and let the plugin dispatch work as earlier steps finish.
 - **Track and adjust in plain language.** Members report progress and final results back as real messages. Add tasks or move remaining work without handling IDs.
 
@@ -47,7 +47,7 @@ Open the **Window collaboration** action in the conversation header to see every
 Ask the test window to check the release and send the result back here.
 ```
 
-The model sends the message to the exact displayed title. You never copy a link or provide a session ID. If two conversations share the same title, the plugin asks you to be specific instead of guessing.
+Every window is addressed by the `dsh://session/...` link shown in the directory, so a name change or a duplicate title never sends a message to the wrong window. Say what you want and the model sends to the matching window's link; if two conversations share a title, it uses the intended window's link instead of guessing.
 
 ![Ask the counting window to compute 1 + 2 and receive its reply as a compact card from the exact source](assets/cross-window-message.png)
 

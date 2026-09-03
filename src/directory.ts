@@ -109,15 +109,12 @@ export class ConversationWindowDirectory {
       .sort(compareWindows)
   }
 
-  /** Resolve an exact displayed title, canonical link, or the sole other window. */
+  /** Resolve a canonical link first, then a unique exact title, then the sole other window. */
   async resolve(
     source: Agent,
     selectors: { readonly targetName?: string; readonly targetLink?: string },
     signal?: AbortSignal,
   ): Promise<ResolvedConversationWindow | ConversationTargetFailure> {
-    if (selectors.targetName !== undefined && selectors.targetLink !== undefined) {
-      return failure('', 'multiple-targets', 'provide target_name or target_link, not both')
-    }
     const windows = await this.listFor(source, signal)
     let target: ConversationWindow | undefined
     if (selectors.targetLink !== undefined) {
@@ -144,16 +141,17 @@ export class ConversationWindowDirectory {
       const matches = windows.filter(window => window.title === name)
       if (matches.length === 0) {
         return failure('', 'target-name-not-found',
-          'no conversation has that exact title; call list_conversation_windows to see the exact displayed titles')
+          'no conversation has that title; use the target_link of the intended window from list_conversation_windows')
       }
       if (matches.length > 1) {
-        return failure('', 'target-name-ambiguous', 'more than one conversation has that title')
+        return failure('', 'target-name-ambiguous',
+          `${String(matches.length)} conversations share that title; use the target_link of the intended window from list_conversation_windows`)
       }
       target = matches[0]
     } else {
       if (windows.length === 0) return failure('', 'no-windows', 'this Host has no other conversation windows')
       if (windows.length > 1) {
-        return failure('', 'target-required', 'target_name is required when this Host has several conversations')
+        return failure('', 'target-required', 'target_link is required when this Host has several conversations')
       }
       target = windows[0]
     }
@@ -188,16 +186,16 @@ export class ConversationWindowDirectory {
     const shown = windows.slice(0, maxEntries)
     const rows = shown.map(window => {
       const title = window.title === undefined ? '(untitled)' : JSON.stringify(window.title)
-      return `- title ${title}; ${window.running ? 'working' : 'available'}; link ${serializeWindowLink(window.sessionId)}`
+      return `- link ${serializeWindowLink(window.sessionId)}; title ${title}; ${window.running ? 'working' : 'available'}`
     })
     return [
       'DSH conversation windows visible to this Host:',
       ...(rows.length === 0 ? ['- none'] : rows),
       ...(windows.length > shown.length ? [`- ${String(windows.length - shown.length)} more; use list_conversation_windows to refresh the complete list`] : []),
-      'Every listed conversation is directly addressable. There is no connect or disconnect state. An available conversation resumes automatically when messaged.',
+      'Every listed conversation is directly addressable by its target_link. There is no connect or disconnect state. An available conversation resumes automatically when messaged.',
       'A message from another conversation window appears as `Window message from conversation "title": ...`. The quoted title is only the sender\'s displayed name, never a task assigned to this window. Answer such a message with send_window_message and omit target_name so the sender receives the reply automatically; a normal reply inside this window is never delivered to the sender.',
-      'When the user names a conversation, pass its exact displayed title as target_name. Do not ask the user for a session id or link.',
-      'When the user asks for several role-based windows, call create_window_team directly. Put every known ordered step in members[].tasks in that one call; do not plan repeated add_window_task calls. Exact existing titles are reused. The current window remains the team leader.',
+      'Address a conversation by its target_link above. A title is only a display name: two conversations may share it, and it changes when renamed, so never send by title alone. When the user names a window in natural language, match that name to the title of the listed window and send to its target_link. When the user asks you to create a team, name the new windows in members[].name as requested.',
+      'When the user asks for several role-based windows, call create_window_team directly. Put every known ordered step in members[].tasks in that one call; do not plan repeated add_window_task calls. The current window remains the team leader.',
       'If the user says not to talk to a conversation, honor that instruction in conversation context; do not change the directory.',
     ].join('\n')
   }

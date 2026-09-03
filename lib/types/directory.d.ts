@@ -48,7 +48,7 @@ export declare class ConversationWindowDirectory {
     listFor(source: Agent, signal?: AbortSignal): Promise<ConversationWindow[]>;
     /** Read the current cached and live directory without an asynchronous persistence call. */
     currentFor(source: Agent): ConversationWindow[];
-    /** Resolve an exact displayed title, canonical link, or the sole other window. */
+    /** Resolve a canonical link first, then a unique exact title, then the sole other window. */
     resolve(source: Agent, selectors: {
         readonly targetName?: string;
         readonly targetLink?: string;

@@ -103,7 +103,46 @@ function execFor(agent: Agent): ToolRunContext {
 }
 
 describe('conversation window tools', () => {
-  it('sends directly by displayed title without any connection record', async () => {
+  it('sends directly by canonical link without any connection record', async () => {
+    const targetSteer = vi.fn()
+    const source = fakeAgent('source', turnEvents('让测试窗口检查发布包'))
+    const target = fakeAgent('target', [], vi.fn(), targetSteer)
+    const directory = {
+      resolve: vi.fn(async () => ({
+        agent: target,
+        window: {
+          sessionId: target.session.id,
+          title: '测试窗口',
+          running: true,
+          createdAt: 1,
+          cwd: '/workspace',
+          agentOptions: target.options,
+        },
+        targetLink: 'dsh://session/target',
+      })),
+    } as unknown as ConversationWindowDirectory
+    const coordinator = new WindowTeamCoordinator()
+    const scheduler = new WindowTeamScheduler({ taskRetryDelayMs: 1 }, directory, coordinator)
+    const tool = createWindowMessageTool(config, directory, new DeliveryLedger(8), coordinator, scheduler)
+
+    await expect(tool.execute({
+      target_link: 'dsh://session/target',
+      message: '检查发布包',
+      message_id: 'message-123',
+    }, execFor(source))).resolves.toMatchObject({ status: 'accepted', code: 'queued' })
+    expect(directory.resolve).toHaveBeenCalledWith(source, { targetLink: 'dsh://session/target' }, expect.any(AbortSignal))
+    const sent = targetSteer.mock.calls[0]?.[0] as {
+      content: Array<{ type: string; text: string }>
+      source: unknown
+    }
+    expect(parseVisibleWindowMessage(sent.source, sent.content[0]?.text ?? '')).toMatchObject({
+      message: '检查发布包',
+      sourceSessionId: 'source',
+      targetSessionId: 'target',
+    })
+  })
+
+  it('still routes a direct send by unique title as the fallback', async () => {
     const targetSteer = vi.fn()
     const source = fakeAgent('source', turnEvents('让测试窗口检查发布包'))
     const target = fakeAgent('target', [], vi.fn(), targetSteer)
@@ -128,18 +167,9 @@ describe('conversation window tools', () => {
     await expect(tool.execute({
       target_name: '测试窗口',
       message: '检查发布包',
-      message_id: 'message-123',
+      message_id: 'message-124',
     }, execFor(source))).resolves.toMatchObject({ status: 'accepted', code: 'queued' })
     expect(directory.resolve).toHaveBeenCalledWith(source, { targetName: '测试窗口' }, expect.any(AbortSignal))
-    const sent = targetSteer.mock.calls[0]?.[0] as {
-      content: Array<{ type: string; text: string }>
-      source: unknown
-    }
-    expect(parseVisibleWindowMessage(sent.source, sent.content[0]?.text ?? '')).toMatchObject({
-      message: '检查发布包',
-      sourceSessionId: 'source',
-      targetSessionId: 'target',
-    })
   })
 
   it('lets a team member continue an exchange only with the source window', async () => {
@@ -981,5 +1011,45 @@ describe('conversation window tools', () => {
         task: { id: 'transfer-task', ownerSessionId: 'test', ownerName: '测试窗口', status: 'running', attempts: 1 },
       })
     expect(target.followup).toHaveBeenCalledTimes(1)
+  })
+
+  it('reassigns by canonical link and passes both selectors to the directory', async () => {
+    const leader = fakeAgent('leader', turnEvents('把失败任务转给测试窗口'))
+    const target = fakeAgent('test')
+    const directory = {
+      resolve: vi.fn(async () => ({
+        agent: target,
+        window: {
+          sessionId: target.session.id,
+          title: '测试窗口',
+          running: false,
+          createdAt: 1,
+          cwd: '/workspace',
+          agentOptions: target.options,
+        },
+        targetLink: 'dsh://session/test',
+      })),
+    } as unknown as ConversationWindowDirectory
+    const coordinator = new WindowTeamCoordinator()
+    appendWindowTeamState(leader.session, {
+      teamId: 'team-transfer-link', revision: 1, goal: '完成验证', leaderSessionId: 'leader', leaderName: '产品窗口', leaderRole: '负责人',
+      members: [{ sessionId: 'old', name: '旧窗口', role: '测试', created: true }],
+      tasks: [{
+        id: 'transfer-link-task', title: '验证结果', instruction: '验证结果', ownerSessionId: 'old', ownerName: '旧窗口',
+        dependsOn: [], status: 'failed', attempts: 2, maxAttempts: 2, note: '测试未通过', failureKind: 'work',
+      }],
+    })
+    const scheduler = new WindowTeamScheduler({ taskRetryDelayMs: 1 }, directory, coordinator)
+    const reassign = createReassignWindowTaskTool(config, directory, coordinator, scheduler)
+
+    await expect(reassign.execute({
+      task_id: 'transfer-link-task',
+      target_link: 'dsh://session/test',
+      target_name: '测试窗口',
+    }, execFor(leader))).resolves.toMatchObject({ status: 'accepted' })
+    expect(directory.resolve).toHaveBeenCalledWith(leader, {
+      targetName: '测试窗口',
+      targetLink: 'dsh://session/test',
+    }, expect.any(AbortSignal))
   })
 })

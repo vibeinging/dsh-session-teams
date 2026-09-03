@@ -16,7 +16,7 @@ Natural-language preferences remain model context. “Do not talk to Testing aga
 
 Cold title and metadata reads use `SessionPersistence.inspect()`. Revision-equal results are reused. A single unreadable or newer-format persisted session is skipped without blocking the remaining directory, while a previously readable cached entry is retained. The latest `session/title` event provides the exact display title. Live events always override the cold cache.
 
-`target_name` performs an exact normalized-title match. Missing and duplicate titles reject instead of guessing. `target_link` is an optional exact selector for internal routing and compatibility. It carries no permission and creates no state. When neither selector is present, omission is accepted only if one other conversation exists.
+`target_link` is the primary address: every listed window carries its canonical `dsh://session/...` link, and the model is taught to send to a window's link rather than by title alone, because titles can duplicate or be renamed. `target_name` remains an optional fallback that performs an exact normalized-title match, valid only while exactly one conversation has that title; a duplicate title rejects with a pointer to the target_link of the intended window. When both selectors are present, the link wins. When neither selector is present, omission is accepted only if one other conversation exists.
 
 ## Delivery and replies
 
@@ -46,7 +46,7 @@ Creation does not roll back successful siblings. A reused conversation is never 
 
 ## Model context and tools
 
-The optional `SystemPrompt` contribution lists a bounded directory snapshot with title, activity, and exact link. It states that every entry is addressable, that there is no connection state, and that natural-language stop preferences must be honored without changing the directory. For a direct team request, it tells the model to call `create_window_team` directly, place all already-known ordered work in `members[].tasks`, and avoid planning a sequence of later `add_window_task` calls. It also states that a unique exact-title conversation is reused and an ambiguous title must be clarified. `list_conversation_windows` performs an asynchronous refresh when the cached snapshot is insufficient.
+The optional `SystemPrompt` contribution lists a bounded directory snapshot with link, title, and activity. It states that every entry is directly addressable by its `target_link`, that a title is only a display name (never a safe address by itself), and that natural-language stop preferences must be honored without changing the directory. For a direct team request, it tells the model to call `create_window_team` directly, place all already-known ordered work in `members[].tasks`, and avoid planning a sequence of later `add_window_task` calls. It also states that a unique exact-title conversation is reused and an ambiguous title must be clarified. `list_conversation_windows` performs an asynchronous refresh when the cached snapshot is insufficient.
 
 The public model tools are:
 

@@ -113,6 +113,42 @@ describe('conversation window directory', () => {
     expect(item.resolveAgent).not.toHaveBeenCalled()
   })
 
+  it('prefers the canonical link over a title when both are supplied', async () => {
+    const source = agent('source', '产品窗口')
+    const item = fixture([
+      { header: header('link-target'), events: titleAndRoute('链接窗口') },
+      { header: header('name-target'), events: titleAndRoute('名字窗口') },
+    ], [source])
+    const resolved = await item.directory.resolve(source, {
+      targetName: '名字窗口',
+      targetLink: 'dsh://session/link-target',
+    })
+    expect(resolved).toMatchObject({ targetLink: 'dsh://session/link-target', window: { title: '链接窗口' } })
+    expect(item.resolveAgent).toHaveBeenCalledWith('link-target')
+  })
+
+  it('guides an ambiguous title to the target_link instead of guessing', async () => {
+    const source = agent('source', '产品窗口')
+    const item = fixture([
+      { header: header('a'), events: titleAndRoute('重复窗口') },
+      { header: header('b'), events: titleAndRoute('重复窗口') },
+    ], [source])
+    const resolved = await item.directory.resolve(source, { targetName: '重复窗口' })
+    expect(resolved).toMatchObject({ code: 'target-name-ambiguous' })
+    if (!('code' in resolved)) throw new Error('expected a failure')
+    expect(resolved.message).toContain('target_link')
+  })
+
+  it('resolves by canonical link alone without any title match', async () => {
+    const source = agent('source', '产品窗口')
+    const item = fixture([
+      { header: header('linked'), events: titleAndRoute('链接窗口') },
+    ], [source])
+    const resolved = await item.directory.resolve(source, { targetLink: 'dsh://session/linked' })
+    expect(resolved).toMatchObject({ targetLink: 'dsh://session/linked', window: { title: '链接窗口' } })
+    expect(item.resolveAgent).toHaveBeenCalledWith('linked')
+  })
+
   it('renders running and available conversations as equally addressable', async () => {
     const source = agent('source', '产品窗口')
     const working = { ...agent('working', '开发窗口'), status: 'running' as const } as Agent
@@ -121,9 +157,10 @@ describe('conversation window directory', () => {
     ], [source, working])
     await item.directory.refresh()
     const context = item.directory.renderModelContext(source, 8)
-    expect(context).toContain('title "开发窗口"; working')
-    expect(context).toContain('title "测试窗口"; available')
-    expect(context).toContain('There is no connect or disconnect state')
+    expect(context).toContain('link dsh://session/working; title "开发窗口"; working')
+    expect(context).toContain('link dsh://session/available; title "测试窗口"; available')
+    expect(context).toContain('directly addressable by its target_link')
+    expect(context).toContain('never send by title alone')
   })
 
   it('states the standing rule for answering incoming window messages', async () => {

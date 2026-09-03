@@ -164,7 +164,7 @@ describe('conversation window header action', () => {
     expect(view.getByText('测试窗口')).toBeDefined()
     expect(view.getByText('工作中')).toBeDefined()
     expect(view.getByText('可对话')).toBeDefined()
-    expect(view.getByText('直接说“让测试窗口检查结果”即可投递，不需要连接或会话 ID。')).toBeDefined()
+    expect(view.getByText('直接说“让测试窗口检查结果”，模型会按目录里的链接找到准确窗口投递。')).toBeDefined()
     expect(view.getByRole('dialog', { name: '窗口协作' }).style.left).toBe('12px')
   })
 
@@ -244,9 +244,21 @@ describe('conversation window header action', () => {
     )
     fireEvent.click(view.getByRole('button', { name: '可对话的窗口：1 个' }))
     fireEvent.click(view.getByRole('button', { name: '跟“测试窗口”对话' }))
-    expect(setDraft).toHaveBeenCalledWith('跟“测试窗口”说：检查结果')
+    expect(setDraft).toHaveBeenCalledWith('跟“测试窗口”（dsh://session/test）说：检查结果')
     expect(view.queryByRole('dialog', { name: '窗口协作' })).toBeNull()
     await waitFor(() => { expect(focus).toHaveBeenCalledOnce() })
+  })
+
+  it('does not double the target prefix when the same window is selected again', () => {
+    const setDraft = vi.fn()
+    const prefix = '跟“测试窗口”（dsh://session/test）说：'
+    const view = render(<WindowCollaborationAction {...props('session-current', [
+      { id: 'test', title: '测试窗口', running: false },
+    ], null, `${prefix}继续检查`, setDraft)} />)
+    fireEvent.click(view.getByRole('button', { name: '可对话的窗口：1 个' }))
+    fireEvent.click(view.getByRole('button', { name: '跟“测试窗口”对话' }))
+    expect(setDraft).toHaveBeenCalledTimes(1)
+    expect(setDraft).toHaveBeenCalledWith(`${prefix}继续检查`)
   })
 
   it('closes the directory with Escape and restores trigger focus', () => {
@@ -319,7 +331,7 @@ describe('conversation window header action', () => {
     ], team, '', setDraft)} />)
     fireEvent.click(view.getByRole('button', { name: '窗口团队：1 个成员' }))
     fireEvent.click(view.getByRole('button', { name: '跟“测试窗口”对话' }))
-    expect(setDraft).toHaveBeenCalledWith('跟“测试窗口”说：')
+    expect(setDraft).toHaveBeenCalledWith('跟“测试窗口”（dsh://session/test）说：')
   })
 
 })
