@@ -6,7 +6,7 @@
 
 ![演示：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回](assets/window-team-demo.gif)
 
-*[观看 70 秒演示](assets/window-team-demo.mp4)：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回。*
+*[观看 70 秒演示](https://github.com/vibeinging/dsh-session-teams/blob/main/assets/window-team-demo.mp4)：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回。*
 
 插件完全基于官方 NPM SDK 开发，是独立包，不是 fork，也不修改 DSH 源码。
 

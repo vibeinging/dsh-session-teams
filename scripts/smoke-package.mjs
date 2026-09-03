@@ -43,7 +43,7 @@ assert.equal(Array.isArray(packed), true)
 assert.equal(packed.length, 1)
 const packedPaths = packed[0].files.map(file => file.path).sort()
 for (const file of packedPaths) {
-  assert.match(file, /^(?:LICENSE|README\.md|README\.zh\.md|cordis\.patch\.yml|package\.json|lib\/(?:index\.js|client\.js|client\.js\.map|types\/.+\.d\.ts))$/u)
+  assert.match(file, /^(?:LICENSE|README\.md|README\.zh\.md|cordis\.patch\.yml|package\.json|lib\/(?:index\.js|client\.js|client\.js\.map|types\/.+\.d\.ts)|assets\/(?:cross-window-message|member-reports|team-panel)\.png|assets\/window-team-demo\.gif)$/u)
 }
 for (const file of [
   'LICENSE',
@@ -56,6 +56,10 @@ for (const file of [
   'lib/client.js.map',
   'lib/types/index.d.ts',
   'lib/types/client/index.d.ts',
+  'assets/cross-window-message.png',
+  'assets/member-reports.png',
+  'assets/team-panel.png',
+  'assets/window-team-demo.gif',
 ]) {
   assert.ok(packedPaths.includes(file), `npm pack is missing ${file}`)
 }

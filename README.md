@@ -6,7 +6,7 @@ Send messages between DSH conversation windows, and turn the current window into
 
 ![Demo: one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message](assets/window-team-demo.gif)
 
-*[Watch the 70-second demo](assets/window-team-demo.mp4): one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message.*
+*[Watch the 70-second demo](https://github.com/vibeinging/dsh-session-teams/blob/main/assets/window-team-demo.mp4): one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message.*
 
 The plugin is an independent package built only on official NPM SDKs. It is not a fork and does not modify DSH source.
 

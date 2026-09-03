@@ -41,6 +41,10 @@ assert.deepEqual(packageJson.files, [
   'README.md',
   'README.zh.md',
   'LICENSE',
+  'assets/cross-window-message.png',
+  'assets/member-reports.png',
+  'assets/team-panel.png',
+  'assets/window-team-demo.gif',
 ])
 
 for (const [name, command] of Object.entries(packageJson.scripts ?? {})) {

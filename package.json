@@ -1,7 +1,7 @@
 {
   "name": "@vibeinging/dsh-session-teams",
   "description": "Persistent conversation teams and task coordination for DSH",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
@@ -55,7 +55,11 @@
     "cordis.patch.yml",
     "README.md",
     "README.zh.md",
-    "LICENSE"
+    "LICENSE",
+    "assets/cross-window-message.png",
+    "assets/member-reports.png",
+    "assets/team-panel.png",
+    "assets/window-team-demo.gif"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json && tsdown",
