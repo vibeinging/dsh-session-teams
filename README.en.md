@@ -6,7 +6,7 @@ Send messages between DSH conversation windows, and turn the current window into
 
 ![Demo: one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message](assets/window-team-demo.gif)
 
-*[Watch the 70-second demo](https://github.com/vibeinging/dsh-session-teams/blob/main/assets/window-team-demo.mp4): one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message.*
+*[Watch the 70-second demo](https://github.com/vibeinging/dsh-session-teams/releases/download/v0.1.1/window-team-demo.mp4): one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message.*
 
 The plugin is an independent package built only on official NPM SDKs. It is not a fork and does not modify DSH source.
 
@@ -19,7 +19,7 @@ The plugin is an independent package built only on official NPM SDKs. It is not 
 ## Install
 
 ```sh
-dsh plugin --profile web add -w @vibeinging/dsh-session-teams@0.1.0
+dsh plugin --profile web add -w @vibeinging/dsh-session-teams@0.1.1
 ```
 
 A DSH profile is a pnpm workspace root, so `-w` is required. Verify the composed configuration contains the `session-teams` entry, then start the profile:
@@ -49,7 +49,7 @@ Ask the test window to check the release and send the result back here.
 
 Every window is addressed by the `dsh://session/...` link shown in the directory, so a name change or a duplicate title never sends a message to the wrong window. Say what you want and the model sends to the matching window's link; if two conversations share a title, it uses the intended window's link instead of guessing.
 
-![Ask the counting window to compute 1 + 2 and receive its reply as a compact card from the exact source](assets/cross-window-message.png)
+![Ask “counting window A” for the current Beijing time; it replies as a real message that returns as a card from the exact source](assets/cross-window-message.png)
 
 The receiving window decides whether to answer. It replies when it has a question, a progress update, or a result — a reply always returns to the exact source window, and sending a message does not end the sender's turn. On a received card, select the source title after **From** to open that exact conversation.
 

@@ -6,7 +6,7 @@
 
 ![演示：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回](assets/window-team-demo.gif)
 
-*[观看 70 秒演示](https://github.com/vibeinging/dsh-session-teams/blob/main/assets/window-team-demo.mp4)：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回。*
+*[观看 70 秒演示](https://github.com/vibeinging/dsh-session-teams/releases/download/v0.1.1/window-team-demo.mp4)：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回。*
 
 插件完全基于官方 NPM SDK 开发，是独立包，不是 fork，也不修改 DSH 源码。
 
@@ -19,7 +19,7 @@
 ## 安装
 
 ```sh
-dsh plugin --profile web add -w @vibeinging/dsh-session-teams@0.1.0
+dsh plugin --profile web add -w @vibeinging/dsh-session-teams@0.1.1
 ```
 
 DSH profile 是 pnpm 工作区根目录，因此必须带 `-w`。启动前先确认组合后的配置里包含 `session-teams` 条目，再启动 profile：
@@ -49,7 +49,7 @@ Ask the test window to check the release and send the result back here.
 
 每个窗口都用目录中展示的 `dsh://session/...` 链接寻址，因此改标题或重名都不会把消息发错窗口。直接说要做什么，模型会把它发送到匹配窗口的链接；如果两个对话同名，模型使用目标窗口的链接，而不是猜测。
 
-![让计数窗口计算 1 + 2，并以紧凑卡片收到来自准确来源的回复](assets/cross-window-message.png)
+![问“计数窗口A”北京现在几点，它用真实消息回复，回复以带来源的卡片回到主窗口](assets/cross-window-message.png)
 
 是否回复由接收窗口自己判断。它可以在有疑问、要同步进度或给出结果时回复——回复始终回到准确的来源窗口，而且发送消息不会结束发送方当前这一轮工作。收到卡片后，点击“来自”后面的来源标题，就能打开那个准确的对话。
 
