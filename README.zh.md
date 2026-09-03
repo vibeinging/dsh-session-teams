@@ -4,7 +4,7 @@
 
 在 DSH 对话窗口之间互发消息，并让当前窗口作为负责人，指挥一组带角色的窗口组成小团队。每条消息都是真实的 DSH 消息：在目标窗口可见、可持久保存，还能点击跳回它的来源。
 
-<video src="assets/window-team-demo.mp4" controls muted></video>
+![演示：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回](assets/window-team-demo.gif)
 
 *[观看 70 秒演示](assets/window-team-demo.mp4)：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回。*
 

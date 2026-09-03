@@ -4,7 +4,7 @@ English | [中文](README.zh.md)
 
 Send messages between DSH conversation windows, and turn the current window into a leader that coordinates a small team of role windows. Every message is a real DSH message: visible in the target, durable, and clickable back to its source.
 
-<video src="assets/window-team-demo.mp4" controls muted></video>
+![Demo: one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message](assets/window-team-demo.gif)
 
 *[Watch the 70-second demo](assets/window-team-demo.mp4): one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message.*
 
