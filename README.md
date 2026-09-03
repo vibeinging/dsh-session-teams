@@ -19,7 +19,7 @@
 ## 安装
 
 ```sh
-dsh plugin --profile web add -w @vibeinging/dsh-session-teams@0.1.1
+dsh plugin --profile web add -w @vibeinging/dsh-session-teams
 ```
 
 DSH profile 是 pnpm 工作区根目录，因此必须带 `-w`。启动前先确认组合后的配置里包含 `session-teams` 条目，再启动 profile：

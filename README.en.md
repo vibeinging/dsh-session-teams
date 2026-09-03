@@ -19,7 +19,7 @@ The plugin is an independent package built only on official NPM SDKs. It is not 
 ## Install
 
 ```sh
-dsh plugin --profile web add -w @vibeinging/dsh-session-teams@0.1.1
+dsh plugin --profile web add -w @vibeinging/dsh-session-teams
 ```
 
 A DSH profile is a pnpm workspace root, so `-w` is required. Verify the composed configuration contains the `session-teams` entry, then start the profile:
