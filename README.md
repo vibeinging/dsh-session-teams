@@ -1,107 +1,107 @@
 # dsh-session-teams
 
-English | [中文](README.zh.md)
+[English](README.en.md) | 中文
 
-Send messages between DSH conversation windows, and turn the current window into a leader that coordinates a small team of role windows. Every message is a real DSH message: visible in the target, durable, and clickable back to its source.
+在 DSH 对话窗口之间互发消息，并让当前窗口作为负责人，指挥一组带角色的窗口组成小团队。每条消息都是真实的 DSH 消息：在目标窗口可见、可持久保存，还能点击跳回它的来源。
 
-![Demo: one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message](assets/window-team-demo.gif)
+![演示：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回](assets/window-team-demo.gif)
 
-*[Watch the 70-second demo](https://github.com/vibeinging/dsh-session-teams/blob/main/assets/window-team-demo.mp4): one leader window creates two counting windows, tasks dispatch and relay automatically, and every report returns as a real message.*
+*[观看 70 秒演示](https://github.com/vibeinging/dsh-session-teams/blob/main/assets/window-team-demo.mp4)：一个负责人窗口创建两个计数窗口，任务自动投递、自动接力，每次汇报都以真实消息返回。*
 
-The plugin is an independent package built only on official NPM SDKs. It is not a fork and does not modify DSH source.
+插件完全基于官方 NPM SDK 开发，是独立包，不是 fork，也不修改 DSH 源码。
 
-## What you can do
+## 能做什么
 
-- **Talk to any conversation window.** Ask a window by its name to check, build, or explain something; the model resolves the name to that window's directory link. The receiver sees a compact message card and answers in that same conversation.
-- **Lead a window team.** Create named role windows, give each one tasks and dependencies, and let the plugin dispatch work as earlier steps finish.
-- **Track and adjust in plain language.** Members report progress and final results back as real messages. Add tasks or move remaining work without handling IDs.
+- **给任意对话窗口发消息。** 说出窗口名字，让某个窗口去检查、实现或解释一件事；模型会把名字解析成该窗口在目录里的链接。接收方看到一张紧凑的消息卡片，并在同一段对话里回复。
+- **带一个窗口团队。** 创建带名字的角色窗口，为每个窗口安排任务和依赖，由插件在上游步骤完成后自动派发后续工作。
+- **用自然语言跟进和调整。** 成员把进度和最终结果以真实消息汇报回来。追加任务、转派剩余工作都不需要碰 ID。
 
-## Install
+## 安装
 
 ```sh
 dsh plugin --profile web add -w @vibeinging/dsh-session-teams@0.1.0
 ```
 
-A DSH profile is a pnpm workspace root, so `-w` is required. Verify the composed configuration contains the `session-teams` entry, then start the profile:
+DSH profile 是 pnpm 工作区根目录，因此必须带 `-w`。启动前先确认组合后的配置里包含 `session-teams` 条目，再启动 profile：
 
 ```sh
 dsh --profile web --dump-config
 dsh --profile web
 ```
 
-The plugin needs DSH `0.1.2-rc.1` with the `web` profile (or a custom profile providing `tools`, `agents`, `sessionController`, `sessionPersistence`, `sessionProjections`, `workspaceRegistry`, and the standard Web conversation UI). Development needs Node.js `^22.19.0` or `>=24.0.0` with pnpm `11.7.0`.
+插件需要 DSH `0.1.2-rc.1` 的 `web` profile（或提供 `tools`、`agents`、`sessionController`、`sessionPersistence`、`sessionProjections`、`workspaceRegistry` 与标准 Web 对话 UI 的自定义 profile）。开发时使用 Node.js `^22.19.0` 或 `>=24.0.0` 与 pnpm `11.7.0`。
 
-Remove the plugin with:
+移除插件：
 
 ```sh
 dsh plugin --profile web remove -w @vibeinging/dsh-session-teams
 ```
 
-Removing the package never deletes DSH conversations.
+移除插件包不会删除任何 DSH 对话。
 
-## Send a message to another window
+## 给另一个窗口发消息
 
-Open the **Window collaboration** action in the conversation header to see every window that can receive a message. Select one to put `Tell "window name": ` before the current draft, or simply describe the target by its title:
+打开对话标题栏里的**窗口协作**入口，可以看到所有能接收消息的窗口。点一行，当前草稿前会加上 `跟“窗口名”说：`；也可以直接用标题描述目标：
 
 ```text
 Ask the test window to check the release and send the result back here.
 ```
 
-Every window is addressed by the `dsh://session/...` link shown in the directory, so a name change or a duplicate title never sends a message to the wrong window. Say what you want and the model sends to the matching window's link; if two conversations share a title, it uses the intended window's link instead of guessing.
+每个窗口都用目录中展示的 `dsh://session/...` 链接寻址，因此改标题或重名都不会把消息发错窗口。直接说要做什么，模型会把它发送到匹配窗口的链接；如果两个对话同名，模型使用目标窗口的链接，而不是猜测。
 
-![Ask the counting window to compute 1 + 2 and receive its reply as a compact card from the exact source](assets/cross-window-message.png)
+![让计数窗口计算 1 + 2，并以紧凑卡片收到来自准确来源的回复](assets/cross-window-message.png)
 
-The receiving window decides whether to answer. It replies when it has a question, a progress update, or a result — a reply always returns to the exact source window, and sending a message does not end the sender's turn. On a received card, select the source title after **From** to open that exact conversation.
+是否回复由接收窗口自己判断。它可以在有疑问、要同步进度或给出结果时回复——回复始终回到准确的来源窗口，而且发送消息不会结束发送方当前这一轮工作。收到卡片后，点击“来自”后面的来源标题，就能打开那个准确的对话。
 
-## Lead a window team
+## 带一个窗口团队
 
-Ask the current window to act as the leader and create role windows:
+让当前窗口做负责人，创建一组分工窗口：
 
 ```text
 Create two windows. Name one Development and let it implement the feature. Name the other Testing and let it verify the result. Coordinate the work until the requirement is complete.
 ```
 
-![The leader opens the window team panel: shared goal, 13 / 13 progress, member roles, and completed task states](assets/team-panel.png)
+![负责人打开窗口团队浮层：共同目标、13 / 13 进度、成员角色与全部完成状态](assets/team-panel.png)
 
-- An existing window with the exact requested title is reused; only missing names create new top-level conversations, composed through the official Session Controller with the current workspace, model, and permissions.
-- Dependencies gate dispatch: if Testing depends on Development, its task waits until Development reports `task_outcome: completed` through `send_window_message`, then Testing starts automatically.
-- Members report progress and final results through `send_window_message` as part of the same conversation. The leader can say “ask Development to revise the implementation” or “move the failed task to Testing” without touching IDs.
-- Failures split in two: temporary technical problems retry automatically up to `maxTaskAttempts`; failed tests, unclear requirements, or unacceptable output go back to the leader as “needs help”.
-- Team state — goal, progress, roles, and task states — lives in the leader's session and shows in the panel above.
+- 标题与请求完全一致的已有窗口会被复用；只有缺少对应标题时才创建新的顶层对话。新窗口统一经官方 Session Controller 组装，使用当前的 Workspace、模型和权限。
+- 依赖决定派发顺序：如果测试任务依赖开发任务，测试会一直等待，直到开发窗口通过 `send_window_message` 汇报 `task_outcome: completed`，随后自动开始。
+- 成员通过 `send_window_message` 在同一段对话中汇报进度和最终结果。负责人可以直接说“让开发窗口修改实现”或“把失败任务转给测试窗口”，不需要处理 ID。
+- 失败分成两类：临时技术故障会自动重试，次数受 `maxTaskAttempts` 限制；测试不通过、需求不清或产出不合格会以“需处理”状态交回给负责人。
+- 团队状态——共同目标、进度、成员角色与任务状态——保存在负责人会话中，显示在上面的浮层里。
 
-![Member windows report counts and final results back to the leader as real messages](assets/member-reports.png)
+![成员窗口以真实消息向负责人汇报计数和最终结果](assets/member-reports.png)
 
-## Configuration
+## 配置
 
-| Key | Default | Meaning |
+| 配置键 | 默认值 | 含义 |
 |---|---:|---|
-| `maxTaskChars` | `20000` | Largest message, team goal, or individual task accepted by the tools. |
-| `maxRememberedMessages` | `1024` | Process-local receipts kept for duplicate suppression. |
-| `requestTimeoutMs` | `30000` | Tool execution and cancellation budget in milliseconds. |
-| `maxTeamMembers` | `8` | Largest role-window team created by one tool call. |
-| `maxTeamTasks` | `64` | Largest number of tasks retained by one team. |
-| `maxTaskAttempts` | `2` | Automatic technical attempts allowed for one task. |
-| `taskRetryDelayMs` | `1000` | Delay before retrying a temporary delivery failure. |
-| `maxDirectoryEntries` | `32` | Conversation titles placed directly in model context; the list tool returns the full set. |
+| `maxTaskChars` | `20000` | 工具接受的单条消息、团队目标或单个任务的最大长度。 |
+| `maxRememberedMessages` | `1024` | 为抑制重复投递而保留的进程内回执数量。 |
+| `requestTimeoutMs` | `30000` | 工具执行和取消的毫秒级时间预算。 |
+| `maxTeamMembers` | `8` | 一次工具调用最多创建的角色窗口数量。 |
+| `maxTeamTasks` | `64` | 一个团队最多保留的任务数量。 |
+| `maxTaskAttempts` | `2` | 每个任务允许自动重试的技术故障次数。 |
+| `taskRetryDelayMs` | `1000` | 临时投递失败后的重试等待毫秒数。 |
+| `maxDirectoryEntries` | `32` | 直接写入模型上下文的对话标题数量；列表工具仍返回完整集合。 |
 
-All values must be positive safe integers; invalid configuration fails when the plugin loads.
+所有值都必须是正安全整数；配置不合法时插件会在加载时失败。
 
-## Safety and limits
+## 安全与限制
 
-- Only ordinary persisted conversations visible to the same Host are addressable. A cold conversation resumes automatically while the Host runs; the plugin does not queue messages while the Host is stopped or cross a Host boundary.
-- There are deliberately no `connect_window` or `disconnect_window` tools. A conversation cannot make itself unreachable, and “do not talk to the test window” stays in conversation context instead of removing the window from the directory.
-- `accepted` means the target inbox accepted the message — not that the work is done. A trusted relay can reply only to its exact source and cannot be redirected to a third conversation.
-- The message and routing contract, the human-authority rule, and migration compatibility for earlier window-link relays are documented in the [design reference](docs/design/2026-09-01_session-teams-design.md) and the [Agent Note](.agents/notes/implemented/feature/2026-09-01-session-teams.md).
+- 只有同一 Host 可见的普通持久对话可以寻址。Host 运行期间冷对话会自动恢复；Host 停止时插件不会排队消息，也不跨 Host 投递。
+- 插件刻意不提供 `connect_window` 或 `disconnect_window`。对话无法让自己变得不可达；“别跟测试窗口说话”这句话只留在对话上下文中，不会把窗口从目录里移除。
+- `accepted` 只表示目标收件箱接收了消息，不表示工作已经完成。可信的转达消息只能回复给准确来源，不能改投给第三个对话。
+- 消息与路由契约、人类授权规则，以及对旧版 window-link 转达的迁移兼容性，见[设计参考](docs/design/2026-09-01_session-teams-design.md)与 [Agent Note](.agents/notes/implemented/feature/2026-09-01-session-teams.md)。
 
 ## DSH Desktop
 
-This plugin targets the standard DSH `web` profile, and the friendliest way to run that profile is our [DSH Desktop](https://github.com/vibeinging/dsh-desktop), a community-maintained desktop distribution that runs the official DeepSeek Harness runtime with conversations, files, Git, terminals, tasks, Worktrees, and a plugin market in one DSH Profile. Its website [dshdesktopstation.com](https://dshdesktopstation.com/) hosts downloads and FAQs.
+本插件面向标准 DSH `web` profile，而运行这个 profile 最友好的方式是我们的 [DSH Desktop](https://github.com/vibeinging/dsh-desktop)：一个社区维护的桌面发行版，在同一 DSH Profile 中运行官方 DeepSeek Harness 运行时，包含对话、文件、Git、终端、任务、Worktree 与插件市场。官网 [dshdesktopstation.com](https://dshdesktopstation.com/) 提供下载与常见问题解答。
 
-## Development
+## 开发
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm run check
 ```
 
-`pnpm run check` runs repository and bilingual-document rules, lint, strict type checking, the focused tests, production builds, runtime smoke checks, and an `npm pack --dry-run` content audit. `npm publish` runs the same gate through `prepublishOnly`.
+`pnpm run check` 会执行仓库与双语文档规则、lint、严格类型检查、聚焦测试、生产构建、运行时冒烟检查，以及 `npm pack --dry-run` 内容审计。`npm publish` 会通过 `prepublishOnly` 运行同一门禁。

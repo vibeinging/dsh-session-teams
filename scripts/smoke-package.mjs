@@ -43,12 +43,12 @@ assert.equal(Array.isArray(packed), true)
 assert.equal(packed.length, 1)
 const packedPaths = packed[0].files.map(file => file.path).sort()
 for (const file of packedPaths) {
-  assert.match(file, /^(?:LICENSE|README\.md|README\.zh\.md|cordis\.patch\.yml|package\.json|lib\/(?:index\.js|client\.js|client\.js\.map|types\/.+\.d\.ts)|assets\/(?:cross-window-message|member-reports|team-panel)\.png|assets\/window-team-demo\.gif)$/u)
+  assert.match(file, /^(?:LICENSE|README\.md|README\.en\.md|cordis\.patch\.yml|package\.json|lib\/(?:index\.js|client\.js|client\.js\.map|types\/.+\.d\.ts)|assets\/(?:cross-window-message|member-reports|team-panel)\.png|assets\/window-team-demo\.gif)$/u)
 }
 for (const file of [
   'LICENSE',
   'README.md',
-  'README.zh.md',
+  'README.en.md',
   'cordis.patch.yml',
   'package.json',
   'lib/index.js',
