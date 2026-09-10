@@ -19,7 +19,7 @@ describe('real Loader composition', () => {
   it('loads the official services and publishes directory and team tool schemas', async () => {
     context = new Context()
     context.provide('sessionPersistence', {
-      listSnapshots: async () => [],
+      list: async () => [],
       inspect: async () => { throw new Error('unexpected inspect') },
     } as never)
     context.provide('sessionController', {
@@ -88,7 +88,7 @@ describe('real Loader composition', () => {
     const attachSession = vi.fn(async () => {})
     const resolveByPath = vi.fn(async () => ({ attachSession }))
     context.provide('sessionPersistence', {
-      listSnapshots: async () => [],
+      list: async () => [],
       inspect: async () => { throw new Error('unexpected inspect') },
     } as never)
     context.provide('sessionController', {
@@ -116,10 +116,10 @@ describe('real Loader composition', () => {
     const memberId = SessionId('restored-member')
     const leaderId = SessionId('restored-leader')
     const memberSession = Session.create(memberId, [], {
-      version: 0, id: memberId, createdAt: 1, cwd: '/workspace', isSeeded: false, delegationDepth: 0,
+      version: 3, id: memberId, createdAt: 1, cwd: '/workspace', isSeeded: false, delegationDepth: 0,
     })
     const leaderSession = Session.create(leaderId, [], {
-      version: 0, id: leaderId, createdAt: 1, cwd: '/workspace', isSeeded: false, delegationDepth: 0,
+      version: 3, id: leaderId, createdAt: 1, cwd: '/workspace', isSeeded: false, delegationDepth: 0,
     })
     SessionTeams.appendWindowTeamState(leaderSession, {
       teamId: 'team-restored',

@@ -52,21 +52,25 @@ function fixture(records: Array<{ header: SessionHeader; events: SessionEvent[] 
     list: () => [...live, ...(resumed === undefined ? [] : [resumed])],
   } as unknown as Pick<AgentRegistry, 'get' | 'list'>
   const persistence = {
-    listSnapshots: vi.fn(async () => records.map((record, index) => ({
+    list: vi.fn(async () => records.map((record, index) => ({
       header: record.header,
       revision: `revision-${String(index)}` as never,
     }))),
-    inspect: vi.fn(async (id) => {
+  } as Pick<SessionPersistence, 'list'>
+  const sessions = {
+    resolveAgent,
+    inspect: vi.fn(async (id: ReturnType<typeof SessionId>) => {
       const record = byId.get(id)
       if (record === undefined) throw new Error('missing')
       return { meta: record.header, events: record.events }
     }),
-  } as Pick<SessionPersistence, 'inspect' | 'listSnapshots'>
+  }
   return {
     agents,
     persistence,
+    sessions,
     resolveAgent,
-    directory: new ConversationWindowDirectory(agents, persistence, { resolveAgent } as never),
+    directory: new ConversationWindowDirectory(agents, persistence, sessions as never),
   }
 }
 
@@ -182,7 +186,7 @@ describe('conversation window directory', () => {
       { header: header('code'), events: titleAndRoute('开发窗口') },
       { header: header('old'), events: titleAndRoute('旧窗口') },
     ], [source])
-    vi.mocked(item.persistence.inspect).mockImplementation(async (id) => {
+    vi.mocked(item.sessions.inspect).mockImplementation(async (id) => {
       if (id === 'old') throw new Error('unsupported session format')
       const title = id === 'code' ? '开发窗口' : '产品窗口'
       return { meta: header(String(id)), events: titleAndRoute(title) }

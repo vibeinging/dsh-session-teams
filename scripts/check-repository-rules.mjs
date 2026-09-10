@@ -87,13 +87,13 @@ for (const name of [
   '@deepseek-ai/dsh-system-prompt',
   '@deepseek-ai/dsh-tools',
 ]) {
-  assert.equal(packageJson.devDependencies?.[name], '0.1.2-rc.1', `${name} must match DSH Desktop rc.1`)
+  assert.equal(packageJson.devDependencies?.[name], '0.1.5-rc.1', `${name} must match DSH Desktop 0.1.5-rc.1`)
 }
 for (const name of [
   '@deepseek-ai/dsh-client-ui-chat',
   '@deepseek-ai/dsh-client-ui-slots',
 ]) {
-  assert.equal(packageJson.devDependencies?.[name], '0.1.2-alpha.5', `${name} must match DSH Desktop rc.1 (no rc.1 was published for this package)`)
+  assert.equal(packageJson.devDependencies?.[name], '0.1.5-rc.1', `${name} must match DSH Desktop 0.1.5-rc.1`)
 }
 assert.equal(packageJson.peerDependencies?.['@deepseek-ai/dsh-client-runtime'], undefined)
 

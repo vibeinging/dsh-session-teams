@@ -1,12 +1,21 @@
 /** Conversation directory and cold-session activation for ordinary DSH windows. */
 import type { Agent, AgentOptions, AgentRegistry } from '@deepseek-ai/dsh-agent';
-import type { SessionEvent, SessionId } from '@deepseek-ai/dsh-session';
+import type { SessionEvent, SessionHeader, SessionId } from '@deepseek-ai/dsh-session';
 import type { SessionPersistence } from '@deepseek-ai/dsh-session-persistence';
 import type { WindowSessionController } from './provisioner.ts';
 /** Official services used by directory lookup, resume, and team creation. */
 export type WindowAgentDirectory = Pick<AgentRegistry, 'get' | 'list'>;
 /** Session-persistence reads needed by the conversation directory. */
-export type WindowSessionPersistence = Pick<SessionPersistence, 'inspect' | 'listSnapshots'>;
+export type WindowSessionPersistence = Pick<SessionPersistence, 'list'>;
+/**
+ * Durable session view: the persisted header plus the visible event prefix.
+ * Since the 0.1.5 runtime the durable store no longer inspects sessions;
+ * SessionController.inspect returns this shape for attached and cold sessions.
+ */
+export interface WindowSessionInspection {
+    readonly meta: SessionHeader;
+    readonly events: readonly SessionEvent[];
+}
 /** One ordinary top-level conversation visible to the current Host. */
 export interface ConversationWindow {
     /** Durable conversation identity. */
@@ -41,7 +50,7 @@ export declare class ConversationWindowDirectory {
     private readonly persistence;
     private readonly sessions;
     /** @param agents - Official live Agent registry. @param persistence - Official durable session store. */
-    constructor(agents: WindowAgentDirectory, persistence: WindowSessionPersistence, sessions: Pick<WindowSessionController, 'resolveAgent'>);
+    constructor(agents: WindowAgentDirectory, persistence: WindowSessionPersistence, sessions: Pick<WindowSessionController, 'resolveAgent' | 'inspect'>);
     /** Refresh cold metadata, reusing inspection results whose durable revision is unchanged. */
     refresh(signal?: AbortSignal): Promise<void>;
     /** List every other ordinary conversation visible to the current Host. */

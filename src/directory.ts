@@ -2,7 +2,6 @@
 import type { Agent, AgentOptions, AgentRegistry } from '@deepseek-ai/dsh-agent'
 import type { SessionEvent, SessionHeader, SessionId } from '@deepseek-ai/dsh-session'
 import type {
-  SessionInspection,
   SessionPersistence,
   SessionPersistenceRevision,
 } from '@deepseek-ai/dsh-session-persistence'
@@ -14,7 +13,17 @@ import type { WindowSessionController } from './provisioner.ts'
 export type WindowAgentDirectory = Pick<AgentRegistry, 'get' | 'list'>
 
 /** Session-persistence reads needed by the conversation directory. */
-export type WindowSessionPersistence = Pick<SessionPersistence, 'inspect' | 'listSnapshots'>
+export type WindowSessionPersistence = Pick<SessionPersistence, 'list'>
+
+/**
+ * Durable session view: the persisted header plus the visible event prefix.
+ * Since the 0.1.5 runtime the durable store no longer inspects sessions;
+ * SessionController.inspect returns this shape for attached and cold sessions.
+ */
+export interface WindowSessionInspection {
+  readonly meta: SessionHeader
+  readonly events: readonly SessionEvent[]
+}
 
 /** One ordinary top-level conversation visible to the current Host. */
 export interface ConversationWindow {
@@ -60,13 +69,13 @@ export class ConversationWindowDirectory {
   constructor(
     private readonly agents: WindowAgentDirectory,
     private readonly persistence: WindowSessionPersistence,
-    private readonly sessions: Pick<WindowSessionController, 'resolveAgent'>,
+    private readonly sessions: Pick<WindowSessionController, 'resolveAgent' | 'inspect'>,
   ) {}
 
   /** Refresh cold metadata, reusing inspection results whose durable revision is unchanged. */
   async refresh(signal?: AbortSignal): Promise<void> {
     signal?.throwIfAborted()
-    const snapshots = await this.persistence.listSnapshots(signal)
+    const snapshots = await this.persistence.list(signal === undefined ? {} : { signal })
     const next = new Map<SessionId, CachedConversationWindow>()
     await Promise.all(snapshots.map(async (snapshot) => {
       if (!isOrdinaryHeader(snapshot.header)) return
@@ -76,7 +85,7 @@ export class ConversationWindowDirectory {
         return
       }
       try {
-        const inspection = await this.persistence.inspect(snapshot.header.id, signal)
+        const inspection = await this.sessions.inspect(snapshot.header.id, signal)
         next.set(snapshot.header.id, {
           revision: snapshot.revision,
           window: windowFromInspection(inspection, false),
@@ -269,7 +278,7 @@ export function readLoggedAgentOptions(events: readonly SessionEvent[]): AgentOp
 }
 
 /** Read one persisted inspection into the common directory shape. */
-function windowFromInspection(inspection: SessionInspection, running: boolean): ConversationWindow {
+function windowFromInspection(inspection: WindowSessionInspection, running: boolean): ConversationWindow {
   return {
     sessionId: inspection.meta.id,
     title: foldSessionTitle(inspection.events)?.title,

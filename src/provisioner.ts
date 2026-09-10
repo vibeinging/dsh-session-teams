@@ -11,7 +11,7 @@ import type { Workspace } from '@deepseek-ai/dsh-workspace'
 /** Session Controller operations used to create fully composed ordinary conversations. */
 export type WindowSessionController = Pick<
   SessionController,
-  'create' | 'rename' | 'resolveAgent' | 'selectModel'
+  'create' | 'rename' | 'resolveAgent' | 'selectModel' | 'inspect'
 >
 
 /** Optional parent-owned product boundary that creates a fully bound product conversation. */

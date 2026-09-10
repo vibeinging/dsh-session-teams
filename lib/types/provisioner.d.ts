@@ -3,7 +3,7 @@ import type { ModelSelection, SessionController } from '@deepseek-ai/dsh-api-ses
 import { type SessionId as SessionIdValue } from '@deepseek-ai/dsh-session';
 import type { Workspace } from '@deepseek-ai/dsh-workspace';
 /** Session Controller operations used to create fully composed ordinary conversations. */
-export type WindowSessionController = Pick<SessionController, 'create' | 'rename' | 'resolveAgent' | 'selectModel'>;
+export type WindowSessionController = Pick<SessionController, 'create' | 'rename' | 'resolveAgent' | 'selectModel' | 'inspect'>;
 /** Optional parent-owned product boundary that creates a fully bound product conversation. */
 export interface WindowConversationHost {
     /** Resolve whether the initiating Session belongs to the product parent or ordinary DSH. */

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import AgentRegistry, { Inbox, type Agent } from '@deepseek-ai/dsh-agent'
+import AgentRegistry, { type Agent } from '@deepseek-ai/dsh-agent'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import { Session, SessionId } from '@deepseek-ai/dsh-session'
 import type { ToolRunContext } from '@deepseek-ai/dsh-tools'
@@ -45,8 +45,17 @@ function activeAgent(ctx: Context, session: Session, inbox: Inbox): Agent {
   } as Agent
 }
 
-function inboxFor(session: Session): Inbox {
-  return new Inbox(session, { inserted() {}, discarded() {}, claimed() {} })
+/** Recording stand-in for the durable Inbox the 0.1.5 runtime now owns internally. */
+class FakeInbox {
+  readonly nextStep: unknown[] = []
+  readonly nextTurn: unknown[] = []
+  append(mode: 'next-step' | 'next-turn', message: unknown): void {
+    ;(mode === 'next-step' ? this.nextStep : this.nextTurn).push(message)
+  }
+}
+
+function inboxFor(_session: Session): FakeInbox {
+  return new FakeInbox()
 }
 
 describe('alpha.4 Host integration', () => {
@@ -57,10 +66,10 @@ describe('alpha.4 Host integration', () => {
     const sourceId = SessionId('host-source')
     const targetId = SessionId('host-target')
     const sourceSession = Session.create(sourceId, [], {
-      version: 0, id: sourceId, createdAt: 1, cwd: '/workspace', isSeeded: false, delegationDepth: 0,
+      version: 3, id: sourceId, createdAt: 1, cwd: '/workspace', isSeeded: false, delegationDepth: 0,
     })
     const targetSession = Session.create(targetId, [], {
-      version: 0, id: targetId, createdAt: 1, cwd: '/workspace', isSeeded: false, delegationDepth: 0,
+      version: 3, id: targetId, createdAt: 1, cwd: '/workspace', isSeeded: false, delegationDepth: 0,
     })
     const sourceAgent = activeAgent(context, sourceSession, inboxFor(sourceSession))
     const targetInbox = inboxFor(targetSession)
